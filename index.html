@@ -21,11 +21,14 @@
     /* Buttons & Inputs */
     .btn { background: #333; color: white; border: none; padding: 10px 15px; border-radius: 8px; margin-bottom: 10px; cursor: pointer; font-size: 16px; width: 100%; font-weight: bold;}
     .btn-action { background: #4caf50; }
-    input { width: calc(100% - 18px); padding: 8px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px;}
+    .input-row { display: flex; gap: 10px; margin-bottom: 10px; }
+    input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; width: 100%; box-sizing: border-box;}
     
     /* Friends List */
     .friend-row { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #f9f9f9; border-radius: 6px; margin-bottom: 8px; border: 1px solid #eee;}
+    .friend-actions { display: flex; gap: 5px; }
     .friend-btn { background: #ff9800; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer;}
+    .unfriend-btn { background: #f44336; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer;}
     
     /* Shared Banner */
     #share-banner { display: none; background: #2196f3; color: white; padding: 12px; border-radius: 8px; margin-bottom: 15px; text-align: center; font-weight: bold; animation: pulse 2s infinite;}
@@ -79,8 +82,11 @@
 
     <div class="card">
       <h3>Add a Friend</h3>
-      <input type="number" id="friend-input" placeholder="Enter 4-Digit Friend ID" maxlength="4">
-      <button class="btn btn-action" onclick="addFriend()">➕ Add to List</button>
+      <div class="input-row">
+        <input type="text" id="friend-name-input" placeholder="Name (e.g. Ben)">
+        <input type="number" id="friend-id-input" placeholder="4-Digit ID" maxlength="4">
+      </div>
+      <button class="btn btn-action" onclick="addFriend()">➕ Add Friend</button>
     </div>
 
     <div class="card">
@@ -118,26 +124,30 @@
 
   <script>
     // --- USER IDENTITY & FRIENDS LOGIC ---
-    // Generate or retrieve personal ID
     let myId = localStorage.getItem("artie_id");
     if (!myId) {
-      myId = Math.floor(1000 + Math.random() * 9000).toString(); // Random 4 digit ID
+      myId = Math.floor(1000 + Math.random() * 9000).toString(); 
       localStorage.setItem("artie_id", myId);
     }
     document.getElementById("my-id-display").innerText = myId;
 
-    // Load friends from storage
-    let friends = JSON.parse(localStorage.getItem("artie_friends") || "[]");
+    let friends = JSON.parse(localStorage.getItem("artie_friends_v2") || "[]");
 
     function renderFriends() {
       let html = "";
       if (friends.length === 0) {
         html = "<p style='color:#888; font-style:italic;'>No friends added yet.</p>";
       } else {
-        friends.forEach(fId => {
+        friends.forEach(f => {
           html += `<div class="friend-row">
-                    <span style="font-size: 20px; font-weight:bold;">ID: ${fId}</span>
-                    <button class="friend-btn" onclick="broadcastTrip('${fId}')">📡 Broadcast Trip</button>
+                    <div>
+                      <div style="font-size: 18px; font-weight:bold;">${f.name}</div>
+                      <div style="font-size: 12px; color:#666;">ID: ${f.id}</div>
+                    </div>
+                    <div class="friend-actions">
+                      <button class="friend-btn" onclick="broadcastTrip('${f.id}')" title="Broadcast Trip">📡</button>
+                      <button class="unfriend-btn" onclick="removeFriend('${f.id}')" title="Remove Friend">❌</button>
+                    </div>
                    </div>`;
         });
       }
@@ -146,14 +156,29 @@
     renderFriends();
 
     function addFriend() {
-      let newFriend = document.getElementById("friend-input").value;
-      if (newFriend.length === 4 && newFriend !== myId && !friends.includes(newFriend)) {
-        friends.push(newFriend);
-        localStorage.setItem("artie_friends", JSON.stringify(friends));
-        document.getElementById("friend-input").value = "";
+      let newId = document.getElementById("friend-id-input").value;
+      let newName = document.getElementById("friend-name-input").value || "Friend";
+      
+      if (newId.length === 4 && newId !== myId && !friends.find(f => f.id === newId)) {
+        friends.push({id: newId, name: newName});
+        localStorage.setItem("artie_friends_v2", JSON.stringify(friends));
+        document.getElementById("friend-id-input").value = "";
+        document.getElementById("friend-name-input").value = "";
         renderFriends();
       } else {
         alert("Please enter a valid, new 4-digit ID.");
+      }
+    }
+
+    // --- NEW: Remove Friend Function ---
+    function removeFriend(idToRemove) {
+      if(confirm("Are you sure you want to remove this friend?")) {
+        // Filter out the friend we want to delete
+        friends = friends.filter(f => f.id !== idToRemove);
+        // Save the updated list back to the phone
+        localStorage.setItem("artie_friends_v2", JSON.stringify(friends));
+        // Redraw the list
+        renderFriends();
       }
     }
 
@@ -178,33 +203,31 @@
       "Default": ["🏪 Convenience Store", "☕️ Nearby Coffee Shop"]
     };
 
-    // Replace this with your new Google Script URL!
     const scriptBaseURL = "https://script.google.com/macros/s/AKfycbz0EeheEfzywcAIMLD2xQQe0WgJlUM8jmdBdIi7C-i2mg5pH726Vv-jAyZ3QvtHNiQE/exec";
 
     function broadcastTrip(friendId) {
-      // Ping the cloud to leave a message in the "Shares" sheet
       fetch(`${scriptBaseURL}?action=share&from=${myId}&to=${friendId}`)
-        .then(() => alert(`Trip broadcasted to ID ${friendId}!`))
+        .then(() => alert(`Trip broadcasted successfully!`))
         .catch(err => alert("Error connecting to server."));
     }
 
     function fetchTrainData() {
-      // We pass 'myId' so the cloud can check our inbox while it grabs the train data!
       fetch(`${scriptBaseURL}?action=read&myId=${myId}`)
         .then(response => response.json())
         .then(data => {
           if(!data.error) {
             
-            // 1. Update Banner if someone shared with us
             let banner = document.getElementById("share-banner");
             if (data.sharedBy) {
-              banner.innerText = `👀 Viewing ID ${data.sharedBy}'s Trip!`;
+              let friendObj = friends.find(f => f.id == data.sharedBy);
+              let displayName = friendObj ? friendObj.name : "ID " + data.sharedBy;
+              
+              banner.innerText = `👀 Viewing ${displayName}'s Trip!`;
               banner.style.display = "block";
             } else {
               banner.style.display = "none";
             }
 
-            // 2. Update Main Cards
             let bestText = data.bestCarName + " : " + data.bestCarOcc + "% full";
             document.getElementById('main-occ').innerText = bestText;
             document.getElementById('detail-occ').innerText = bestText;
@@ -220,14 +243,12 @@
             else if(data.bestCarOcc < 80) mainOcc.style.color = "#ffeb3b";
             else mainOcc.style.color = "#f44336";
 
-            // 3. Update Gimmicks
             document.getElementById('gimmick-title').innerText = "Spots near " + stationName + ":";
             let spots = gimmicks[stationName] || gimmicks["Default"];
             let spotsHtml = "";
             for(let i=0; i < spots.length; i++) spotsHtml += "<div class='gimmick-item'>" + spots[i] + "</div>";
             document.getElementById('gimmick-list').innerHTML = spotsHtml;
 
-            // 4. Generate Tables
             let carsHtml = "<tr><th>Other cars</th><th>capacity</th></tr>";
             for(let i=0; i < data.allCars.length; i++) {
               let isBest = (data.allCars[i] === data.bestCarOcc) ? "style='color: #4caf50; font-weight:bold;'" : "";
@@ -245,7 +266,6 @@
         .catch(err => console.error('Fetch error:', err));
     }
 
-    // Run once, then check every 5 seconds
     fetchTrainData();
     setInterval(fetchTrainData, 5000);
   </script>
