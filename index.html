@@ -27,6 +27,11 @@
     .friend-btn { background: #ff9800; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer;}
     .unfriend-btn { background: #f44336; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer;}
     
+    /* Fare Calculator Styles */
+    .fare-grid { display: flex; justify-content: space-between; align-items: center; }
+    .fare-col { width: 48%; }
+    .vertical-line { border-left: 2px solid #333; height: 60px; }
+    
     /* Trip View Selector */
     .view-selector-box { background: #e3f2fd; padding: 10px; border-radius: 8px; margin-bottom: 15px; border: 2px solid #2196f3; display: flex; align-items: center; gap: 10px;}
     
@@ -40,9 +45,6 @@
     .view { display: none; }
     .active-view { display: block; }
     .gimmick-item { padding: 8px; background: #fff3e0; border-radius: 6px; margin-bottom: 5px; font-weight: 500; }
-
-    /* Broadcast Modal */
-    #broadcast-modal { display: none; margin-top: 10px; padding-top: 10px; border-top: 1px dashed #ccc; }
   </style>
 </head>
 <body>
@@ -56,9 +58,9 @@
     
     <div class="view-selector-box">
       <strong>Viewing:</strong>
-      <select id="trip-selector" onchange="forceUIRefresh()">
+      <select id="trip-selector" onchange="forceUIRefresh()" style="margin-bottom:0;">
         <option value="me">My Trip</option>
-        </select>
+      </select>
     </div>
 
     <div id="share-banner">👀 Viewing Trip!</div>
@@ -67,6 +69,48 @@
       <h3>least occupied car:</h3>
       <div class="highlight-text" id="main-occ">Loading...</div>
       <div class="arrow">&rarr;</div>
+    </div>
+
+    <div class="card">
+      <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+        <select id="ticket-type" onchange="calculateFare()" style="flex: 1;">
+          <option value="beep">Stored Value</option>
+          <option value="sj">Single Journey</option>
+        </select>
+        <select id="discount-type" onchange="calculateFare()" style="flex: 1;">
+          <option value="reg">Regular Fare</option>
+          <option value="disc">50% Discount</option>
+        </select>
+      </div>
+      <div class="fare-grid">
+        <div class="fare-col">
+          <label>Starting:</label>
+          <select id="start-station" onchange="calculateFare()">
+            <option value="0">Recto</option><option value="1">Legarda</option>
+            <option value="2">Pureza</option><option value="3">V. Mapa</option>
+            <option value="4">J. Ruiz</option><option value="5">Gilmore</option>
+            <option value="6">Betty Go</option><option value="7">Cubao</option>
+            <option value="8">Anonas</option><option value="9">Katipunan</option>
+            <option value="10">Santolan</option><option value="11">Marikina</option>
+            <option value="12">Antipolo</option>
+          </select>
+          <label>Ending:</label>
+          <select id="end-station" onchange="calculateFare()">
+            <option value="0">Recto</option><option value="1">Legarda</option>
+            <option value="2">Pureza</option><option value="3">V. Mapa</option>
+            <option value="4">J. Ruiz</option><option value="5">Gilmore</option>
+            <option value="6">Betty Go</option><option value="7" selected>Cubao</option>
+            <option value="8">Anonas</option><option value="9">Katipunan</option>
+            <option value="10">Santolan</option><option value="11">Marikina</option>
+            <option value="12">Antipolo</option>
+          </select>
+        </div>
+        <div class="vertical-line"></div>
+        <div class="fare-col" style="text-align: center;">
+          <h3>Price:</h3>
+          <h2 id="fare-price" style="color: #4caf50; margin:0;">--</h2>
+        </div>
+      </div>
     </div>
 
     <div class="card nav-card" onclick="switchDetail('view-history')">
@@ -133,14 +177,49 @@
     document.getElementById("my-id-display").innerText = myId;
 
     let friends = JSON.parse(localStorage.getItem("artie_friends_v2") || "[]");
-    let currentGlobalData = null; // Store data here so UI can refresh without waiting for cloud
+    let currentGlobalData = null; 
 
-    // Standard stations list for the Broadcast dropdown
+    // --- FARE CALCULATOR LOGIC ---
+    const fareMatrix = [
+      [13, 15, 16, 18, 19, 21, 22, 23, 25, 26, 28, 31, 33],
+      [15, 13, 15, 17, 18, 19, 21, 22, 24, 25, 27, 29, 32],
+      [16, 15, 13, 15, 16, 18, 19, 20, 22, 23, 26, 28, 30],
+      [18, 17, 15, 13, 15, 16, 17, 19, 20, 22, 24, 26, 29],
+      [19, 18, 16, 15, 13, 14, 16, 17, 19, 20, 22, 24, 27],
+      [21, 19, 18, 16, 14, 13, 15, 16, 18, 19, 21, 23, 26],
+      [22, 21, 19, 17, 16, 15, 13, 15, 16, 18, 20, 22, 25],
+      [23, 22, 20, 19, 17, 16, 15, 13, 15, 16, 19, 21, 23],
+      [25, 24, 22, 20, 19, 18, 16, 15, 13, 14, 17, 19, 22],
+      [26, 25, 23, 22, 20, 19, 18, 16, 14, 13, 16, 18, 21],
+      [28, 27, 26, 24, 22, 21, 20, 19, 17, 16, 13, 15, 18],
+      [31, 29, 28, 26, 24, 23, 22, 21, 19, 18, 15, 13, 16],
+      [33, 32, 30, 29, 27, 26, 25, 23, 22, 21, 18, 16, 13]
+    ];
+
+    function calculateFare() {
+      let start = parseInt(document.getElementById('start-station').value);
+      let end = parseInt(document.getElementById('end-station').value);
+      let isSingleJourney = document.getElementById('ticket-type').value === "sj";
+      let isDiscounted = document.getElementById('discount-type').value === "disc";
+      let priceDisplay = document.getElementById('fare-price');
+
+      if (start === end) {
+        priceDisplay.innerText = "0";
+      } else {
+        let svReg = fareMatrix[start][end];
+        let finalFare = svReg;
+        if (isSingleJourney) finalFare = Math.ceil(svReg / 5) * 5;
+        if (isDiscounted) finalFare = isSingleJourney ? Math.round(finalFare / 2) : (finalFare / 2).toFixed(2);
+        priceDisplay.innerHTML = "&#8369;" + finalFare;
+      }
+    }
+    calculateFare(); // Run once on load
+
+    // --- FRIENDS UI ---
     const stationsList = ["Recto", "Legarda", "Pureza", "V. Mapa", "J. Ruiz", "Gilmore", "Betty Go", "Cubao", "Anonas", "Katipunan", "Santolan", "Marikina", "Antipolo"];
     let stationOptions = "";
     stationsList.forEach(s => stationOptions += `<option value="${s}">${s}</option>`);
 
-    // --- FRIENDS UI ---
     function renderFriends() {
       let html = "";
       if (friends.length === 0) {
@@ -204,7 +283,7 @@
       "Default": ["🏪 Convenience Store", "☕️ Nearby Coffee Shop"]
     };
 
-    const scriptBaseURL = "https://script.google.com/macros/s/AKfycbz0EeheEfzywcAIMLD2xQQe0WgJlUM8jmdBdIi7C-i2mg5pH726Vv-jAyZ3QvtHNiQE/exec";
+    const scriptBaseURL = "https://script.google.com/macros/s/AKfycbxcPJfHKZYBLjKcnLur200nKnv3IPJYKftf_9PWq2UkV8fo4jzYrJTrV7PFLqCJ6Yaa/exec";
 
     function broadcastTrip(friendId) {
       let car = document.getElementById(`car-select-${friendId}`).value;
@@ -223,7 +302,6 @@
       let selector = document.getElementById("trip-selector");
       let selectedView = selector.value; 
 
-      // Rebuild the dropdown options to include active shares
       let optionsHtml = `<option value="me">My Trip</option>`;
       if (data.activeShares) {
         Object.keys(data.activeShares).forEach(friendId => {
@@ -234,7 +312,6 @@
       }
       selector.innerHTML = optionsHtml;
       
-      // Keep their current selection if it still exists
       if (selectedView === "me" || data.activeShares[selectedView]) {
         selector.value = selectedView;
       } else {
@@ -247,19 +324,16 @@
       let stationName = data.currentStation;
 
       if (selectedView === "me") {
-        // --- NORMAL VIEW ---
         banner.style.display = "none";
         banner.className = "";
         document.getElementById('main-occ').innerText = bestText;
       } else {
-        // --- FRIEND VIEW ---
         let shareInfo = data.activeShares[selectedView];
         let friendObj = friends.find(f => f.id == selectedView);
         let name = friendObj ? friendObj.name : "Friend";
         
         banner.style.display = "block";
         
-        // CHECK FOR ARRIVAL
         if (data.currentStation === shareInfo.dest) {
           banner.className = "arrived-banner";
           banner.innerText = `🎉 ${name} arrived at ${shareInfo.dest}!`;
@@ -269,7 +343,6 @@
           banner.className = "";
           banner.innerText = `👀 Viewing ${name}'s Trip (Car ${shareInfo.car} to ${shareInfo.dest})`;
           
-          // Display the occupancy of the SPECIFIC car their friend is in
           let friendCarOcc = data.allCars[shareInfo.car - 1]; 
           document.getElementById('main-occ').innerText = `Car ${shareInfo.car} : ${friendCarOcc}% full`;
           
@@ -280,7 +353,6 @@
         }
       }
 
-      // Universal Updates (History & Gimmicks stay the same)
       document.getElementById('main-prev-label').innerText = "Left " + stationName + ":";
       document.getElementById('prev-station-time').innerText = data.currentTime;
       
@@ -290,7 +362,6 @@
       for(let i=0; i < spots.length; i++) spotsHtml += "<div class='gimmick-item'>" + spots[i] + "</div>";
       document.getElementById('gimmick-list').innerHTML = spotsHtml;
 
-      // Update Cars Table
       let carsHtml = "<tr><th>Other cars</th><th>capacity</th></tr>";
       for(let i=0; i < data.allCars.length; i++) {
         let isBest = (selectedView === "me" && data.allCars[i] === data.bestCarOcc) || (selectedView !== "me" && i+1 == data.activeShares[selectedView]?.car) ? "style='color: #4caf50; font-weight:bold;'" : "";
