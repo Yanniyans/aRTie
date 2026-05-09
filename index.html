@@ -7,31 +7,31 @@
   <style>
     body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f9; color: #333; margin: 0; padding: 15px; }
     h2, h3, h4 { margin: 0 0 10px 0; color: #1a1a1a; }
-    .card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); position: relative; border: 2px solid #e0e0e0; transition: border-color 0.2s;}
-    .nav-card { cursor: pointer; }
+    .card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 2px solid #e0e0e0;}
+    .nav-card { cursor: pointer; position: relative; transition: border-color 0.2s;}
     .nav-card:active { border-color: #ff9800; }
     .highlight-text { font-size: 32px; font-weight: bold; text-align: center; margin: 10px 0; color: #ff9800; border-top: 2px solid #333; padding-top: 10px;}
     .arrow { position: absolute; bottom: 15px; right: 20px; font-size: 24px; font-weight: bold; color: #ff9800; }
     
-    /* App Navigation */
     .top-nav { display: flex; gap: 10px; margin-bottom: 15px; }
     .nav-tab { flex: 1; padding: 10px; text-align: center; background: #ddd; border-radius: 8px; font-weight: bold; cursor: pointer; }
     .nav-tab.active { background: #333; color: white; }
     
-    /* Buttons & Inputs */
     .btn { background: #333; color: white; border: none; padding: 10px 15px; border-radius: 8px; margin-bottom: 10px; cursor: pointer; font-size: 16px; width: 100%; font-weight: bold;}
     .btn-action { background: #4caf50; }
     .input-row { display: flex; gap: 10px; margin-bottom: 10px; }
-    input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; width: 100%; box-sizing: border-box;}
+    input, select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; width: 100%; box-sizing: border-box;}
     
-    /* Friends List */
-    .friend-row { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #f9f9f9; border-radius: 6px; margin-bottom: 8px; border: 1px solid #eee;}
-    .friend-actions { display: flex; gap: 5px; }
+    .friend-row { background: #f9f9f9; padding: 10px; border-radius: 6px; margin-bottom: 8px; border: 1px solid #eee;}
+    .friend-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 10px;}
     .friend-btn { background: #ff9800; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer;}
     .unfriend-btn { background: #f44336; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer;}
     
-    /* Shared Banner */
-    #share-banner { display: none; background: #2196f3; color: white; padding: 12px; border-radius: 8px; margin-bottom: 15px; text-align: center; font-weight: bold; animation: pulse 2s infinite;}
+    /* Trip View Selector */
+    .view-selector-box { background: #e3f2fd; padding: 10px; border-radius: 8px; margin-bottom: 15px; border: 2px solid #2196f3; display: flex; align-items: center; gap: 10px;}
+    
+    #share-banner { display: none; background: #2196f3; color: white; padding: 12px; border-radius: 8px; margin-bottom: 15px; text-align: center; font-weight: bold; }
+    .arrived-banner { background: #4caf50 !important; animation: pulse 2s infinite; }
     @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
     
     table { width: 100%; border-collapse: collapse; margin-top: 10px; }
@@ -40,6 +40,9 @@
     .view { display: none; }
     .active-view { display: block; }
     .gimmick-item { padding: 8px; background: #fff3e0; border-radius: 6px; margin-bottom: 5px; font-weight: 500; }
+
+    /* Broadcast Modal */
+    #broadcast-modal { display: none; margin-top: 10px; padding-top: 10px; border-top: 1px dashed #ccc; }
   </style>
 </head>
 <body>
@@ -49,10 +52,17 @@
     <div id="tab-friends" class="nav-tab" onclick="switchMainTab('view-friends', 'tab-friends')">👥 Friends</div>
   </div>
 
-  <div id="share-banner">👀 Viewing Friend's Trip!</div>
-
   <div id="view-home" class="view active-view">
     
+    <div class="view-selector-box">
+      <strong>Viewing:</strong>
+      <select id="trip-selector" onchange="forceUIRefresh()">
+        <option value="me">My Trip</option>
+        </select>
+    </div>
+
+    <div id="share-banner">👀 Viewing Trip!</div>
+
     <div class="card nav-card" onclick="switchDetail('view-cars')">
       <h3>least occupied car:</h3>
       <div class="highlight-text" id="main-occ">Loading...</div>
@@ -91,17 +101,12 @@
 
     <div class="card">
       <h3>My Friends</h3>
-      <div id="friends-list-container">
-        </div>
+      <div id="friends-list-container"></div>
     </div>
   </div>
 
   <div id="view-cars" class="view">
     <button class="btn" onclick="switchDetail('view-home')">&larr; Back</button>
-    <div class="card">
-      <h3>least occupied car:</h3>
-      <div class="highlight-text" id="detail-occ">--</div>
-    </div>
     <div class="card">
       <table id="cars-table">
         <tr><th>Other cars</th><th>capacity</th></tr>
@@ -112,10 +117,6 @@
   <div id="view-history" class="view">
     <button class="btn" onclick="switchDetail('view-home')">&larr; Back</button>
     <div class="card">
-      <h4 id="detail-prev-label">Left &lt;Prev. Station&gt;:</h4>
-      <div style="font-size: 24px; font-weight: bold; text-align: center; margin-top:10px;" id="hist-station-time">--:-- --</div>
-    </div>
-    <div class="card">
       <table id="history-table">
         <tr><th>station name</th><th>time</th></tr>
       </table>
@@ -123,7 +124,7 @@
   </div>
 
   <script>
-    // --- USER IDENTITY & FRIENDS LOGIC ---
+    // System Setup
     let myId = localStorage.getItem("artie_id");
     if (!myId) {
       myId = Math.floor(1000 + Math.random() * 9000).toString(); 
@@ -132,7 +133,14 @@
     document.getElementById("my-id-display").innerText = myId;
 
     let friends = JSON.parse(localStorage.getItem("artie_friends_v2") || "[]");
+    let currentGlobalData = null; // Store data here so UI can refresh without waiting for cloud
 
+    // Standard stations list for the Broadcast dropdown
+    const stationsList = ["Recto", "Legarda", "Pureza", "V. Mapa", "J. Ruiz", "Gilmore", "Betty Go", "Cubao", "Anonas", "Katipunan", "Santolan", "Marikina", "Antipolo"];
+    let stationOptions = "";
+    stationsList.forEach(s => stationOptions += `<option value="${s}">${s}</option>`);
+
+    // --- FRIENDS UI ---
     function renderFriends() {
       let html = "";
       if (friends.length === 0) {
@@ -140,13 +148,15 @@
       } else {
         friends.forEach(f => {
           html += `<div class="friend-row">
-                    <div>
-                      <div style="font-size: 18px; font-weight:bold;">${f.name}</div>
-                      <div style="font-size: 12px; color:#666;">ID: ${f.id}</div>
+                    <div style="display:flex; justify-content:space-between;">
+                      <div><strong style="font-size: 18px;">${f.name}</strong> <span style="color:#666; font-size: 12px;">ID: ${f.id}</span></div>
+                      <button class="unfriend-btn" onclick="removeFriend('${f.id}')">❌</button>
                     </div>
+                    
                     <div class="friend-actions">
-                      <button class="friend-btn" onclick="broadcastTrip('${f.id}')" title="Broadcast Trip">📡</button>
-                      <button class="unfriend-btn" onclick="removeFriend('${f.id}')" title="Remove Friend">❌</button>
+                      <select id="car-select-${f.id}" style="width: 30%; margin:0;"><option value="1">Car 1</option><option value="2">Car 2</option><option value="3">Car 3</option></select>
+                      <select id="dest-select-${f.id}" style="width: 40%; margin:0;">${stationOptions}</select>
+                      <button class="friend-btn" onclick="broadcastTrip('${f.id}')">📡 Send</button>
                     </div>
                    </div>`;
         });
@@ -158,38 +168,29 @@
     function addFriend() {
       let newId = document.getElementById("friend-id-input").value;
       let newName = document.getElementById("friend-name-input").value || "Friend";
-      
       if (newId.length === 4 && newId !== myId && !friends.find(f => f.id === newId)) {
         friends.push({id: newId, name: newName});
         localStorage.setItem("artie_friends_v2", JSON.stringify(friends));
         document.getElementById("friend-id-input").value = "";
         document.getElementById("friend-name-input").value = "";
         renderFriends();
-      } else {
-        alert("Please enter a valid, new 4-digit ID.");
-      }
+      } else { alert("Invalid or duplicate ID."); }
     }
 
-    // --- NEW: Remove Friend Function ---
-    function removeFriend(idToRemove) {
-      if(confirm("Are you sure you want to remove this friend?")) {
-        // Filter out the friend we want to delete
-        friends = friends.filter(f => f.id !== idToRemove);
-        // Save the updated list back to the phone
+    function removeFriend(id) {
+      if(confirm("Remove this friend?")) {
+        friends = friends.filter(f => f.id !== id);
         localStorage.setItem("artie_friends_v2", JSON.stringify(friends));
-        // Redraw the list
         renderFriends();
       }
     }
 
-    // --- VIEW NAVIGATION ---
     function switchMainTab(viewId, tabId) {
       document.querySelectorAll('.view').forEach(el => el.classList.remove('active-view'));
       document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
       document.getElementById(viewId).classList.add('active-view');
       document.getElementById(tabId).classList.add('active');
     }
-
     function switchDetail(viewId) {
       document.querySelectorAll('.view').forEach(el => el.classList.remove('active-view'));
       document.getElementById(viewId).classList.add('active-view');
@@ -203,12 +204,100 @@
       "Default": ["🏪 Convenience Store", "☕️ Nearby Coffee Shop"]
     };
 
-    const scriptBaseURL = "https://script.google.com/macros/s/AKfycbyp7VyYHrWNqsNSzmWseQYAYfbJRHsI4CObqTXynhJQqNQ-Y0qkGoa31S7fm3SA/exec";
+    const scriptBaseURL = "https://script.google.com/macros/s/AKfycbz0EeheEfzywcAIMLD2xQQe0WgJlUM8jmdBdIi7C-i2mg5pH726Vv-jAyZ3QvtHNiQE/exec";
 
     function broadcastTrip(friendId) {
-      fetch(`${scriptBaseURL}?action=share&from=${myId}&to=${friendId}`)
-        .then(() => alert(`Trip broadcasted successfully!`))
-        .catch(err => alert("Error connecting to server."));
+      let car = document.getElementById(`car-select-${friendId}`).value;
+      let dest = document.getElementById(`dest-select-${friendId}`).value;
+      
+      fetch(`${scriptBaseURL}?action=share&from=${myId}&to=${friendId}&car=${car}&dest=${dest}`, { mode: 'no-cors' })
+        .then(() => alert(`Trip details sent to ${friendId}!`))
+        .catch(err => alert("Error connecting."));
+    }
+
+    function forceUIRefresh() {
+      if(currentGlobalData) updateUI(currentGlobalData);
+    }
+
+    function updateUI(data) {
+      let selector = document.getElementById("trip-selector");
+      let selectedView = selector.value; 
+
+      // Rebuild the dropdown options to include active shares
+      let optionsHtml = `<option value="me">My Trip</option>`;
+      if (data.activeShares) {
+        Object.keys(data.activeShares).forEach(friendId => {
+          let friendObj = friends.find(f => f.id == friendId);
+          let name = friendObj ? friendObj.name : "ID " + friendId;
+          optionsHtml += `<option value="${friendId}">${name}'s Trip</option>`;
+        });
+      }
+      selector.innerHTML = optionsHtml;
+      
+      // Keep their current selection if it still exists
+      if (selectedView === "me" || data.activeShares[selectedView]) {
+        selector.value = selectedView;
+      } else {
+        selectedView = "me"; 
+        selector.value = "me";
+      }
+
+      let banner = document.getElementById("share-banner");
+      let bestText = data.bestCarName + " : " + data.bestCarOcc + "% full";
+      let stationName = data.currentStation;
+
+      if (selectedView === "me") {
+        // --- NORMAL VIEW ---
+        banner.style.display = "none";
+        banner.className = "";
+        document.getElementById('main-occ').innerText = bestText;
+      } else {
+        // --- FRIEND VIEW ---
+        let shareInfo = data.activeShares[selectedView];
+        let friendObj = friends.find(f => f.id == selectedView);
+        let name = friendObj ? friendObj.name : "Friend";
+        
+        banner.style.display = "block";
+        
+        // CHECK FOR ARRIVAL
+        if (data.currentStation === shareInfo.dest) {
+          banner.className = "arrived-banner";
+          banner.innerText = `🎉 ${name} arrived at ${shareInfo.dest}!`;
+          document.getElementById('main-occ').innerText = `Trip Complete`;
+          document.getElementById('main-occ').style.color = "#4caf50";
+        } else {
+          banner.className = "";
+          banner.innerText = `👀 Viewing ${name}'s Trip (Car ${shareInfo.car} to ${shareInfo.dest})`;
+          
+          // Display the occupancy of the SPECIFIC car their friend is in
+          let friendCarOcc = data.allCars[shareInfo.car - 1]; 
+          document.getElementById('main-occ').innerText = `Car ${shareInfo.car} : ${friendCarOcc}% full`;
+          
+          let mainOcc = document.getElementById('main-occ');
+          if(friendCarOcc < 50) mainOcc.style.color = "#4caf50";
+          else if(friendCarOcc < 80) mainOcc.style.color = "#ffeb3b";
+          else mainOcc.style.color = "#f44336";
+        }
+      }
+
+      // Universal Updates (History & Gimmicks stay the same)
+      document.getElementById('main-prev-label').innerText = "Left " + stationName + ":";
+      document.getElementById('prev-station-time').innerText = data.currentTime;
+      
+      document.getElementById('gimmick-title').innerText = "Spots near " + stationName + ":";
+      let spots = gimmicks[stationName] || gimmicks["Default"];
+      let spotsHtml = "";
+      for(let i=0; i < spots.length; i++) spotsHtml += "<div class='gimmick-item'>" + spots[i] + "</div>";
+      document.getElementById('gimmick-list').innerHTML = spotsHtml;
+
+      // Update Cars Table
+      let carsHtml = "<tr><th>Other cars</th><th>capacity</th></tr>";
+      for(let i=0; i < data.allCars.length; i++) {
+        let isBest = (selectedView === "me" && data.allCars[i] === data.bestCarOcc) || (selectedView !== "me" && i+1 == data.activeShares[selectedView]?.car) ? "style='color: #4caf50; font-weight:bold;'" : "";
+        let label = (selectedView !== "me" && i+1 == data.activeShares[selectedView]?.car) ? "★" : "";
+        carsHtml += `<tr><td>Car ${i+1} ${label}</td><td ${isBest}>${data.allCars[i]}%</td></tr>`;
+      }
+      document.getElementById('cars-table').innerHTML = carsHtml;
     }
 
     function fetchTrainData() {
@@ -216,54 +305,10 @@
         .then(response => response.json())
         .then(data => {
           if(!data.error) {
-            
-            let banner = document.getElementById("share-banner");
-            if (data.sharedBy) {
-              let friendObj = friends.find(f => f.id == data.sharedBy);
-              let displayName = friendObj ? friendObj.name : "ID " + data.sharedBy;
-              
-              banner.innerText = `👀 Viewing ${displayName}'s Trip!`;
-              banner.style.display = "block";
-            } else {
-              banner.style.display = "none";
-            }
-
-            let bestText = data.bestCarName + " : " + data.bestCarOcc + "% full";
-            document.getElementById('main-occ').innerText = bestText;
-            document.getElementById('detail-occ').innerText = bestText;
-            
-            let stationName = data.currentStation;
-            document.getElementById('main-prev-label').innerText = "Left " + stationName + ":";
-            document.getElementById('detail-prev-label').innerText = "Left " + stationName + ":";
-            document.getElementById('prev-station-time').innerText = data.currentTime;
-            document.getElementById('hist-station-time').innerText = data.currentTime;
-            
-            let mainOcc = document.getElementById('main-occ');
-            if(data.bestCarOcc < 50) mainOcc.style.color = "#4caf50";
-            else if(data.bestCarOcc < 80) mainOcc.style.color = "#ffeb3b";
-            else mainOcc.style.color = "#f44336";
-
-            document.getElementById('gimmick-title').innerText = "Spots near " + stationName + ":";
-            let spots = gimmicks[stationName] || gimmicks["Default"];
-            let spotsHtml = "";
-            for(let i=0; i < spots.length; i++) spotsHtml += "<div class='gimmick-item'>" + spots[i] + "</div>";
-            document.getElementById('gimmick-list').innerHTML = spotsHtml;
-
-            let carsHtml = "<tr><th>Other cars</th><th>capacity</th></tr>";
-            for(let i=0; i < data.allCars.length; i++) {
-              let isBest = (data.allCars[i] === data.bestCarOcc) ? "style='color: #4caf50; font-weight:bold;'" : "";
-              carsHtml += `<tr><td>Car ${i+1}${i===0?" (Head)":i===data.allCars.length-1?" (Tail)":""}</td><td ${isBest}>${data.allCars[i]}%</td></tr>`;
-            }
-            document.getElementById('cars-table').innerHTML = carsHtml;
-
-            let histHtml = "<tr><th>station name</th><th>time</th></tr>";
-            for(let i=0; i < data.history.length; i++) {
-              histHtml += `<tr><td>${data.history[i].station}</td><td>${data.history[i].time}</td></tr>`;
-            }
-            document.getElementById('history-table').innerHTML = histHtml;
+            currentGlobalData = data;
+            updateUI(data);
           }
-        })
-        .catch(err => console.error('Fetch error:', err));
+        }).catch(err => console.error('Fetch error:', err));
     }
 
     fetchTrainData();
