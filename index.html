@@ -12,12 +12,25 @@
     .nav-card:active { border-color: #ff9800; }
     .highlight-text { font-size: 32px; font-weight: bold; text-align: center; margin: 10px 0; color: #ff9800; border-top: 2px solid #333; padding-top: 10px;}
     .arrow { position: absolute; bottom: 15px; right: 20px; font-size: 24px; font-weight: bold; color: #ff9800; }
-    .back-btn, .share-btn { background: #333; color: white; border: none; padding: 10px 15px; border-radius: 8px; margin-bottom: 15px; cursor: pointer; font-size: 16px; width: 100%; font-weight: bold;}
-    .share-btn { background: #ff9800; margin-top: 5px; }
-    .fare-grid { display: flex; justify-content: space-between; align-items: center; }
-    .fare-col { width: 48%; }
-    .vertical-line { border-left: 2px solid #333; height: 60px; }
-    select { width: 100%; padding: 8px; margin-bottom: 5px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px;}
+    
+    /* App Navigation */
+    .top-nav { display: flex; gap: 10px; margin-bottom: 15px; }
+    .nav-tab { flex: 1; padding: 10px; text-align: center; background: #ddd; border-radius: 8px; font-weight: bold; cursor: pointer; }
+    .nav-tab.active { background: #333; color: white; }
+    
+    /* Buttons & Inputs */
+    .btn { background: #333; color: white; border: none; padding: 10px 15px; border-radius: 8px; margin-bottom: 10px; cursor: pointer; font-size: 16px; width: 100%; font-weight: bold;}
+    .btn-action { background: #4caf50; }
+    input { width: calc(100% - 18px); padding: 8px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px;}
+    
+    /* Friends List */
+    .friend-row { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #f9f9f9; border-radius: 6px; margin-bottom: 8px; border: 1px solid #eee;}
+    .friend-btn { background: #ff9800; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer;}
+    
+    /* Shared Banner */
+    #share-banner { display: none; background: #2196f3; color: white; padding: 12px; border-radius: 8px; margin-bottom: 15px; text-align: center; font-weight: bold; animation: pulse 2s infinite;}
+    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
+    
     table { width: 100%; border-collapse: collapse; margin-top: 10px; }
     th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
     th { border-bottom: 2px solid #333; }
@@ -28,19 +41,22 @@
 </head>
 <body>
 
+  <div class="top-nav">
+    <div id="tab-tracker" class="nav-tab active" onclick="switchMainTab('view-home', 'tab-tracker')">🚆 Tracker</div>
+    <div id="tab-friends" class="nav-tab" onclick="switchMainTab('view-friends', 'tab-friends')">👥 Friends</div>
+  </div>
+
+  <div id="share-banner">👀 Viewing Friend's Trip!</div>
+
   <div id="view-home" class="view active-view">
     
-    <h2 style="text-align: center; color: #ff9800;">aRTie Live Tracker</h2>
-
-    <div class="card nav-card" onclick="switchView('view-cars')">
+    <div class="card nav-card" onclick="switchDetail('view-cars')">
       <h3>least occupied car:</h3>
       <div class="highlight-text" id="main-occ">Loading...</div>
       <div class="arrow">&rarr;</div>
     </div>
 
-    <button class="share-btn" onclick="shareTrip()">📤 Share Trip Status</button>
-
-    <div class="card nav-card" onclick="switchView('view-history')">
+    <div class="card nav-card" onclick="switchDetail('view-history')">
       <h4 id="main-prev-label">Left &lt;Prev. Station&gt;:</h4>
       <div class="highlight-text" style="font-size: 28px; color: #333;" id="prev-station-time">--:-- --</div>
       <div class="arrow">&rarr;</div>
@@ -52,11 +68,30 @@
         <div class="gimmick-item">Loading local spots...</div>
       </div>
     </div>
+  </div>
 
+  <div id="view-friends" class="view">
+    <div class="card" style="text-align: center;">
+      <h3>Your aRTie ID</h3>
+      <h1 id="my-id-display" style="color: #ff9800; font-size: 48px; margin: 10px 0;">----</h1>
+      <p style="margin: 0; color: #666; font-size: 14px;">Give this code to friends so they can add you.</p>
+    </div>
+
+    <div class="card">
+      <h3>Add a Friend</h3>
+      <input type="number" id="friend-input" placeholder="Enter 4-Digit Friend ID" maxlength="4">
+      <button class="btn btn-action" onclick="addFriend()">➕ Add to List</button>
+    </div>
+
+    <div class="card">
+      <h3>My Friends</h3>
+      <div id="friends-list-container">
+        </div>
+    </div>
   </div>
 
   <div id="view-cars" class="view">
-    <button class="back-btn" onclick="switchView('view-home')">&larr; Back</button>
+    <button class="btn" onclick="switchDetail('view-home')">&larr; Back</button>
     <div class="card">
       <h3>least occupied car:</h3>
       <div class="highlight-text" id="detail-occ">--</div>
@@ -69,7 +104,7 @@
   </div>
 
   <div id="view-history" class="view">
-    <button class="back-btn" onclick="switchView('view-home')">&larr; Back</button>
+    <button class="btn" onclick="switchDetail('view-home')">&larr; Back</button>
     <div class="card">
       <h4 id="detail-prev-label">Left &lt;Prev. Station&gt;:</h4>
       <div style="font-size: 24px; font-weight: bold; text-align: center; margin-top:10px;" id="hist-station-time">--:-- --</div>
@@ -82,59 +117,94 @@
   </div>
 
   <script>
-    // --- GIMMICK DICTIONARY ---
-    // Add your local spots for each station here!
-    const gimmicks = {
-      "Katipunan": ["📍 Pop Up Katipunan", "🛍️ UP Town Center", "📚 Ateneo Art Gallery"],
-      "Cubao": ["🛍️ Ali Mall", "🍻 Cubao Expo", "🎨 Art in Island"],
-      "Legarda": ["☕️ Local Cafes", "🏛️ National Museum (Short ride)"],
-      "Default": ["🏪 Convenience Store", "☕️ Nearby Coffee Shop"]
-    };
+    // --- USER IDENTITY & FRIENDS LOGIC ---
+    // Generate or retrieve personal ID
+    let myId = localStorage.getItem("artie_id");
+    if (!myId) {
+      myId = Math.floor(1000 + Math.random() * 9000).toString(); // Random 4 digit ID
+      localStorage.setItem("artie_id", myId);
+    }
+    document.getElementById("my-id-display").innerText = myId;
 
-    // --- GLOBAL VARIABLES FOR SHARING ---
-    let currentShareText = "I'm riding the aRTie train! Track my trip.";
+    // Load friends from storage
+    let friends = JSON.parse(localStorage.getItem("artie_friends") || "[]");
 
-    function switchView(viewId) {
+    function renderFriends() {
+      let html = "";
+      if (friends.length === 0) {
+        html = "<p style='color:#888; font-style:italic;'>No friends added yet.</p>";
+      } else {
+        friends.forEach(fId => {
+          html += `<div class="friend-row">
+                    <span style="font-size: 20px; font-weight:bold;">ID: ${fId}</span>
+                    <button class="friend-btn" onclick="broadcastTrip('${fId}')">📡 Broadcast Trip</button>
+                   </div>`;
+        });
+      }
+      document.getElementById("friends-list-container").innerHTML = html;
+    }
+    renderFriends();
+
+    function addFriend() {
+      let newFriend = document.getElementById("friend-input").value;
+      if (newFriend.length === 4 && newFriend !== myId && !friends.includes(newFriend)) {
+        friends.push(newFriend);
+        localStorage.setItem("artie_friends", JSON.stringify(friends));
+        document.getElementById("friend-input").value = "";
+        renderFriends();
+      } else {
+        alert("Please enter a valid, new 4-digit ID.");
+      }
+    }
+
+    // --- VIEW NAVIGATION ---
+    function switchMainTab(viewId, tabId) {
+      document.querySelectorAll('.view').forEach(el => el.classList.remove('active-view'));
+      document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+      document.getElementById(viewId).classList.add('active-view');
+      document.getElementById(tabId).classList.add('active');
+    }
+
+    function switchDetail(viewId) {
       document.querySelectorAll('.view').forEach(el => el.classList.remove('active-view'));
       document.getElementById(viewId).classList.add('active-view');
     }
 
-    function shareTrip() {
-      if (navigator.share) {
-        navigator.share({
-          title: 'My aRTie Trip',
-          text: currentShareText,
-          url: window.location.href // This will share the actual link to your Vercel/GitHub app
-        }).catch(console.error);
-      } else {
-        alert("Copy this to share: " + currentShareText + " " + window.location.href);
-      }
-    }
+    // --- DATA & CLOUD SYNC ---
+    const gimmicks = {
+      "Katipunan": ["📍 Pop Up Katipunan", "🛍️ UP Town Center", "📚 Ateneo Art Gallery"],
+      "Cubao": ["🛍️ Ali Mall", "🍻 Cubao Expo", "🎨 Art in Island"],
+      "Legarda": ["☕️ Local Cafes", "🏛️ National Museum"],
+      "Default": ["🏪 Convenience Store", "☕️ Nearby Coffee Shop"]
+    };
 
-    function updateGimmicks(stationName) {
-      document.getElementById('gimmick-title').innerText = "Spots near " + stationName + ":";
-      
-      // Get spots from dictionary, or fallback to Default
-      let spots = gimmicks[stationName] || gimmicks["Default"];
-      
-      let spotsHtml = "";
-      for(let i=0; i < spots.length; i++) {
-        spotsHtml += "<div class='gimmick-item'>" + spots[i] + "</div>";
-      }
-      document.getElementById('gimmick-list').innerHTML = spotsHtml;
-    }
+    // Replace this with your new Google Script URL!
+    const scriptBaseURL = "https://script.google.com/macros/s/AKfycbz0EeheEfzywcAIMLD2xQQe0WgJlUM8jmdBdIi7C-i2mg5pH726Vv-jAyZ3QvtHNiQE/exec";
 
-    // --- DIRECT CLOUD SYNC ---
-    // This connects directly to Google Apps Script instead of the ESP32
-    const googleURL = "https://script.google.com/macros/s/AKfycbz0EeheEfzywcAIMLD2xQQe0WgJlUM8jmdBdIi7C-i2mg5pH726Vv-jAyZ3QvtHNiQE/exec?action=read";
+    function broadcastTrip(friendId) {
+      // Ping the cloud to leave a message in the "Shares" sheet
+      fetch(`${scriptBaseURL}?action=share&from=${myId}&to=${friendId}`)
+        .then(() => alert(`Trip broadcasted to ID ${friendId}!`))
+        .catch(err => alert("Error connecting to server."));
+    }
 
     function fetchTrainData() {
-      fetch(googleURL)
+      // We pass 'myId' so the cloud can check our inbox while it grabs the train data!
+      fetch(`${scriptBaseURL}?action=read&myId=${myId}`)
         .then(response => response.json())
         .then(data => {
           if(!data.error) {
             
-            // 1. Update Main Cards
+            // 1. Update Banner if someone shared with us
+            let banner = document.getElementById("share-banner");
+            if (data.sharedBy) {
+              banner.innerText = `👀 Viewing ID ${data.sharedBy}'s Trip!`;
+              banner.style.display = "block";
+            } else {
+              banner.style.display = "none";
+            }
+
+            // 2. Update Main Cards
             let bestText = data.bestCarName + " : " + data.bestCarOcc + "% full";
             document.getElementById('main-occ').innerText = bestText;
             document.getElementById('detail-occ').innerText = bestText;
@@ -150,24 +220,24 @@
             else if(data.bestCarOcc < 80) mainOcc.style.color = "#ffeb3b";
             else mainOcc.style.color = "#f44336";
 
-            // 2. Update Gimmicks & Share Text
-            updateGimmicks(stationName);
-            currentShareText = `I just left ${stationName} on aRTie! ${data.bestCarName} is ${data.bestCarOcc}% full.`;
+            // 3. Update Gimmicks
+            document.getElementById('gimmick-title').innerText = "Spots near " + stationName + ":";
+            let spots = gimmicks[stationName] || gimmicks["Default"];
+            let spotsHtml = "";
+            for(let i=0; i < spots.length; i++) spotsHtml += "<div class='gimmick-item'>" + spots[i] + "</div>";
+            document.getElementById('gimmick-list').innerHTML = spotsHtml;
 
-            // 3. Generate Cars Table
+            // 4. Generate Tables
             let carsHtml = "<tr><th>Other cars</th><th>capacity</th></tr>";
             for(let i=0; i < data.allCars.length; i++) {
-              let carNum = i + 1;
               let isBest = (data.allCars[i] === data.bestCarOcc) ? "style='color: #4caf50; font-weight:bold;'" : "";
-              let headTail = (i===0) ? " (Head)" : ((i === data.allCars.length - 1) ? " (Tail)" : "");
-              carsHtml += "<tr><td>Car " + carNum + headTail + "</td><td " + isBest + ">" + data.allCars[i] + "%</td></tr>";
+              carsHtml += `<tr><td>Car ${i+1}${i===0?" (Head)":i===data.allCars.length-1?" (Tail)":""}</td><td ${isBest}>${data.allCars[i]}%</td></tr>`;
             }
             document.getElementById('cars-table').innerHTML = carsHtml;
 
-            // 4. Generate History Table
             let histHtml = "<tr><th>station name</th><th>time</th></tr>";
             for(let i=0; i < data.history.length; i++) {
-              histHtml += "<tr><td>" + data.history[i].station + "</td><td>" + data.history[i].time + "</td></tr>";
+              histHtml += `<tr><td>${data.history[i].station}</td><td>${data.history[i].time}</td></tr>`;
             }
             document.getElementById('history-table').innerHTML = histHtml;
           }
@@ -175,7 +245,7 @@
         .catch(err => console.error('Fetch error:', err));
     }
 
-    // Fetch immediately on load, then every 5 seconds (to be gentle on Google's rate limits)
+    // Run once, then check every 5 seconds
     fetchTrainData();
     setInterval(fetchTrainData, 5000);
   </script>
