@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>aRTie | Global Live Tracker</title>
+  <style>
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f9; color: #333; margin: 0; padding: 15px; }
+    h2, h3, h4 { margin: 0 0 10px 0; color: #1a1a1a; }
+    .card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); position: relative; border: 2px solid #e0e0e0; transition: border-color 0.2s;}
+    .nav-card { cursor: pointer; }
+    .nav-card:active { border-color: #ff9800; }
+    .highlight-text { font-size: 32px; font-weight: bold; text-align: center; margin: 10px 0; color: #ff9800; border-top: 2px solid #333; padding-top: 10px;}
+    .arrow { position: absolute; bottom: 15px; right: 20px; font-size: 24px; font-weight: bold; color: #ff9800; }
+    .back-btn, .share-btn { background: #333; color: white; border: none; padding: 10px 15px; border-radius: 8px; margin-bottom: 15px; cursor: pointer; font-size: 16px; width: 100%; font-weight: bold;}
+    .share-btn { background: #ff9800; margin-top: 5px; }
+    .fare-grid { display: flex; justify-content: space-between; align-items: center; }
+    .fare-col { width: 48%; }
+    .vertical-line { border-left: 2px solid #333; height: 60px; }
+    select { width: 100%; padding: 8px; margin-bottom: 5px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px;}
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+    th { border-bottom: 2px solid #333; }
+    .view { display: none; }
+    .active-view { display: block; }
+    .gimmick-item { padding: 8px; background: #fff3e0; border-radius: 6px; margin-bottom: 5px; font-weight: 500; }
+  </style>
+</head>
+<body>
+
+  <div id="view-home" class="view active-view">
+    
+    <h2 style="text-align: center; color: #ff9800;">aRTie Live Tracker</h2>
+
+    <div class="card nav-card" onclick="switchView('view-cars')">
+      <h3>least occupied car:</h3>
+      <div class="highlight-text" id="main-occ">Loading...</div>
+      <div class="arrow">&rarr;</div>
+    </div>
+
+    <button class="share-btn" onclick="shareTrip()">📤 Share Trip Status</button>
+
+    <div class="card nav-card" onclick="switchView('view-history')">
+      <h4 id="main-prev-label">Left &lt;Prev. Station&gt;:</h4>
+      <div class="highlight-text" style="font-size: 28px; color: #333;" id="prev-station-time">--:-- --</div>
+      <div class="arrow">&rarr;</div>
+    </div>
+
+    <div class="card">
+      <h3 id="gimmick-title">Nearby Spots:</h3>
+      <div id="gimmick-list">
+        <div class="gimmick-item">Loading local spots...</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div id="view-cars" class="view">
+    <button class="back-btn" onclick="switchView('view-home')">&larr; Back</button>
+    <div class="card">
+      <h3>least occupied car:</h3>
+      <div class="highlight-text" id="detail-occ">--</div>
+    </div>
+    <div class="card">
+      <table id="cars-table">
+        <tr><th>Other cars</th><th>capacity</th></tr>
+      </table>
+    </div>
+  </div>
+
+  <div id="view-history" class="view">
+    <button class="back-btn" onclick="switchView('view-home')">&larr; Back</button>
+    <div class="card">
+      <h4 id="detail-prev-label">Left &lt;Prev. Station&gt;:</h4>
+      <div style="font-size: 24px; font-weight: bold; text-align: center; margin-top:10px;" id="hist-station-time">--:-- --</div>
+    </div>
+    <div class="card">
+      <table id="history-table">
+        <tr><th>station name</th><th>time</th></tr>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    // --- GIMMICK DICTIONARY ---
+    // Add your local spots for each station here!
+    const gimmicks = {
+      "Katipunan": ["📍 Pop Up Katipunan", "🛍️ UP Town Center", "📚 Ateneo Art Gallery"],
+      "Cubao": ["🛍️ Ali Mall", "🍻 Cubao Expo", "🎨 Art in Island"],
+      "Legarda": ["☕️ Local Cafes", "🏛️ National Museum (Short ride)"],
+      "Default": ["🏪 Convenience Store", "☕️ Nearby Coffee Shop"]
+    };
+
+    // --- GLOBAL VARIABLES FOR SHARING ---
+    let currentShareText = "I'm riding the aRTie train! Track my trip.";
+
+    function switchView(viewId) {
+      document.querySelectorAll('.view').forEach(el => el.classList.remove('active-view'));
+      document.getElementById(viewId).classList.add('active-view');
+    }
+
+    function shareTrip() {
+      if (navigator.share) {
+        navigator.share({
+          title: 'My aRTie Trip',
+          text: currentShareText,
+          url: window.location.href // This will share the actual link to your Vercel/GitHub app
+        }).catch(console.error);
+      } else {
+        alert("Copy this to share: " + currentShareText + " " + window.location.href);
+      }
+    }
+
+    function updateGimmicks(stationName) {
+      document.getElementById('gimmick-title').innerText = "Spots near " + stationName + ":";
+      
+      // Get spots from dictionary, or fallback to Default
+      let spots = gimmicks[stationName] || gimmicks["Default"];
+      
+      let spotsHtml = "";
+      for(let i=0; i < spots.length; i++) {
+        spotsHtml += "<div class='gimmick-item'>" + spots[i] + "</div>";
+      }
+      document.getElementById('gimmick-list').innerHTML = spotsHtml;
+    }
+
+    // --- DIRECT CLOUD SYNC ---
+    // This connects directly to Google Apps Script instead of the ESP32
+    const googleURL = "https://script.google.com/macros/s/AKfycbz0EeheEfzywcAIMLD2xQQe0WgJlUM8jmdBdIi7C-i2mg5pH726Vv-jAyZ3QvtHNiQE/exec?action=read";
+
+    function fetchTrainData() {
+      fetch(googleURL)
+        .then(response => response.json())
+        .then(data => {
+          if(!data.error) {
+            
+            // 1. Update Main Cards
+            let bestText = data.bestCarName + " : " + data.bestCarOcc + "% full";
+            document.getElementById('main-occ').innerText = bestText;
+            document.getElementById('detail-occ').innerText = bestText;
+            
+            let stationName = data.currentStation;
+            document.getElementById('main-prev-label').innerText = "Left " + stationName + ":";
+            document.getElementById('detail-prev-label').innerText = "Left " + stationName + ":";
+            document.getElementById('prev-station-time').innerText = data.currentTime;
+            document.getElementById('hist-station-time').innerText = data.currentTime;
+            
+            let mainOcc = document.getElementById('main-occ');
+            if(data.bestCarOcc < 50) mainOcc.style.color = "#4caf50";
+            else if(data.bestCarOcc < 80) mainOcc.style.color = "#ffeb3b";
+            else mainOcc.style.color = "#f44336";
+
+            // 2. Update Gimmicks & Share Text
+            updateGimmicks(stationName);
+            currentShareText = `I just left ${stationName} on aRTie! ${data.bestCarName} is ${data.bestCarOcc}% full.`;
+
+            // 3. Generate Cars Table
+            let carsHtml = "<tr><th>Other cars</th><th>capacity</th></tr>";
+            for(let i=0; i < data.allCars.length; i++) {
+              let carNum = i + 1;
+              let isBest = (data.allCars[i] === data.bestCarOcc) ? "style='color: #4caf50; font-weight:bold;'" : "";
+              let headTail = (i===0) ? " (Head)" : ((i === data.allCars.length - 1) ? " (Tail)" : "");
+              carsHtml += "<tr><td>Car " + carNum + headTail + "</td><td " + isBest + ">" + data.allCars[i] + "%</td></tr>";
+            }
+            document.getElementById('cars-table').innerHTML = carsHtml;
+
+            // 4. Generate History Table
+            let histHtml = "<tr><th>station name</th><th>time</th></tr>";
+            for(let i=0; i < data.history.length; i++) {
+              histHtml += "<tr><td>" + data.history[i].station + "</td><td>" + data.history[i].time + "</td></tr>";
+            }
+            document.getElementById('history-table').innerHTML = histHtml;
+          }
+        })
+        .catch(err => console.error('Fetch error:', err));
+    }
+
+    // Fetch immediately on load, then every 5 seconds (to be gentle on Google's rate limits)
+    fetchTrainData();
+    setInterval(fetchTrainData, 5000);
+  </script>
+</body>
+</html>
