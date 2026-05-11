@@ -328,7 +328,8 @@
       if (spots.eat && spots.eat.length > 0) spotsHtml += `<div class="cat-title">🍽️ Places to Eat</div>` + spots.eat.map(s => `<div class='gimmick-item'>${s}</div>`).join('');
       if (spots.ent && spots.ent.length > 0) spotsHtml += `<div class="cat-title">🎭 Entertainment</div>` + spots.ent.map(s => `<div class='gimmick-item'>${s}</div>`).join('');
       if (spots.edu && spots.edu.length > 0) spotsHtml += `<div class="cat-title">🎓 Schools</div>` + spots.edu.map(s => `<div class='gimmick-item'>${s}</div>`).join('');
-      if (spots.other && spots.other.length > 0) spotsHtml += `<div class="cat-title">🛍️ Others</div>` + spots.other.map(s => `<div class='gimmick-item'>${s}</div>`).join('');
+      if (spots.mall && spots.mall.length > 0) spotsHtml += `<div class="cat-title">🛍️ Malls</div>` + spots.mall.map(s => `<div class='gimmick-item'>${s}</div>`).join(''); 
+      if (spots.other && spots.other.length > 0) spotsHtml += `<div class="cat-title">📌 Others</div>` + spots.other.map(s => `<div class='gimmick-item'>${s}</div>`).join('');
       document.getElementById('gimmick-list').innerHTML = spotsHtml;
 
       let carsHtml = "<tr><th>Other cars</th><th>capacity</th></tr>";
