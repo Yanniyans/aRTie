@@ -27,12 +27,10 @@
     .friend-btn { background: #ff9800; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer;}
     .unfriend-btn { background: #f44336; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer;}
     
-    /* Fare Calculator Styles */
     .fare-grid { display: flex; justify-content: space-between; align-items: center; }
     .fare-col { width: 48%; }
     .vertical-line { border-left: 2px solid #333; height: 60px; }
     
-    /* Trip View Selector */
     .view-selector-box { background: #e3f2fd; padding: 10px; border-radius: 8px; margin-bottom: 15px; border: 2px solid #2196f3; display: flex; align-items: center; gap: 10px;}
     
     #share-banner { display: none; background: #2196f3; color: white; padding: 12px; border-radius: 8px; margin-bottom: 15px; text-align: center; font-weight: bold; }
@@ -44,7 +42,10 @@
     th { border-bottom: 2px solid #333; }
     .view { display: none; }
     .active-view { display: block; }
-    .gimmick-item { padding: 8px; background: #fff3e0; border-radius: 6px; margin-bottom: 5px; font-weight: 500; }
+    
+    /* Gimmick Categories */
+    .cat-title { font-size: 14px; font-weight: bold; color: #555; margin-top: 12px; margin-bottom: 6px; border-bottom: 1px solid #ddd; padding-bottom: 4px; text-transform: uppercase;}
+    .gimmick-item { padding: 8px; background: #fff3e0; border-radius: 6px; margin-bottom: 5px; font-weight: 500; font-size: 14px;}
   </style>
 </head>
 <body>
@@ -64,6 +65,8 @@
     </div>
 
     <div id="share-banner">👀 Viewing Trip!</div>
+
+    <button id="stop-broadcast-btn" class="unfriend-btn" style="display:none; width:100%; margin-bottom:15px; font-size:16px; padding:12px;" onclick="stopMyBroadcast()">🛑 Stop Broadcasting My Trip</button>
 
     <div class="card nav-card" onclick="switchDetail('view-cars')">
       <h3>least occupied car:</h3>
@@ -86,23 +89,11 @@
         <div class="fare-col">
           <label>Starting:</label>
           <select id="start-station" onchange="calculateFare()">
-            <option value="0">Recto</option><option value="1">Legarda</option>
-            <option value="2">Pureza</option><option value="3">V. Mapa</option>
-            <option value="4">J. Ruiz</option><option value="5">Gilmore</option>
-            <option value="6">Betty Go</option><option value="7">Cubao</option>
-            <option value="8">Anonas</option><option value="9">Katipunan</option>
-            <option value="10">Santolan</option><option value="11">Marikina</option>
-            <option value="12">Antipolo</option>
+            <option value="0">Recto</option><option value="1">Legarda</option><option value="2">Pureza</option><option value="3">V. Mapa</option><option value="4">J. Ruiz</option><option value="5">Gilmore</option><option value="6">Betty Go</option><option value="7">Cubao</option><option value="8">Anonas</option><option value="9">Katipunan</option><option value="10">Santolan</option><option value="11">Marikina</option><option value="12">Antipolo</option>
           </select>
           <label>Ending:</label>
           <select id="end-station" onchange="calculateFare()">
-            <option value="0">Recto</option><option value="1">Legarda</option>
-            <option value="2">Pureza</option><option value="3">V. Mapa</option>
-            <option value="4">J. Ruiz</option><option value="5">Gilmore</option>
-            <option value="6">Betty Go</option><option value="7" selected>Cubao</option>
-            <option value="8">Anonas</option><option value="9">Katipunan</option>
-            <option value="10">Santolan</option><option value="11">Marikina</option>
-            <option value="12">Antipolo</option>
+            <option value="0">Recto</option><option value="1">Legarda</option><option value="2">Pureza</option><option value="3">V. Mapa</option><option value="4">J. Ruiz</option><option value="5">Gilmore</option><option value="6">Betty Go</option><option value="7" selected>Cubao</option><option value="8">Anonas</option><option value="9">Katipunan</option><option value="10">Santolan</option><option value="11">Marikina</option><option value="12">Antipolo</option>
           </select>
         </div>
         <div class="vertical-line"></div>
@@ -131,18 +122,16 @@
     <div class="card" style="text-align: center;">
       <h3>Your aRTie ID</h3>
       <h1 id="my-id-display" style="color: #ff9800; font-size: 48px; margin: 10px 0;">----</h1>
-      <p style="margin: 0; color: #666; font-size: 14px;">Give this code to friends so they can add you!</p>
+      <p style="margin: 0; color: #666; font-size: 14px;">Give this code to friends so they can add you.</p>
     </div>
-
     <div class="card">
       <h3>Add a Friend</h3>
       <div class="input-row">
-        <input type="text" id="friend-name-input" placeholder="Name (e.g. Pompompurin)">
+        <input type="text" id="friend-name-input" placeholder="Name (e.g. Ben)">
         <input type="number" id="friend-id-input" placeholder="4-Digit ID" maxlength="4">
       </div>
       <button class="btn btn-action" onclick="addFriend()">➕ Add Friend</button>
     </div>
-
     <div class="card">
       <h3>My Friends</h3>
       <div id="friends-list-container"></div>
@@ -151,20 +140,11 @@
 
   <div id="view-cars" class="view">
     <button class="btn" onclick="switchDetail('view-home')">&larr; Back</button>
-    <div class="card">
-      <table id="cars-table">
-        <tr><th>Other cars</th><th>capacity</th></tr>
-      </table>
-    </div>
+    <div class="card"><table id="cars-table"><tr><th>Other cars</th><th>capacity</th></tr></table></div>
   </div>
-
   <div id="view-history" class="view">
     <button class="btn" onclick="switchDetail('view-home')">&larr; Back</button>
-    <div class="card">
-      <table id="history-table">
-        <tr><th>station name</th><th>time</th></tr>
-      </table>
-    </div>
+    <div class="card"><table id="history-table"><tr><th>station name</th><th>time</th></tr></table></div>
   </div>
 
   <script>
@@ -178,42 +158,28 @@
 
     let friends = JSON.parse(localStorage.getItem("artie_friends_v2") || "[]");
     let currentGlobalData = null; 
+    let knownShares = []; // Tracks who is currently sharing with us for the Notification Alert
 
-    // --- FARE CALCULATOR LOGIC ---
+    // --- FARE CALCULATOR ---
     const fareMatrix = [
-      [13, 15, 16, 18, 19, 21, 22, 23, 25, 26, 28, 31, 33],
-      [15, 13, 15, 17, 18, 19, 21, 22, 24, 25, 27, 29, 32],
-      [16, 15, 13, 15, 16, 18, 19, 20, 22, 23, 26, 28, 30],
-      [18, 17, 15, 13, 15, 16, 17, 19, 20, 22, 24, 26, 29],
-      [19, 18, 16, 15, 13, 14, 16, 17, 19, 20, 22, 24, 27],
-      [21, 19, 18, 16, 14, 13, 15, 16, 18, 19, 21, 23, 26],
-      [22, 21, 19, 17, 16, 15, 13, 15, 16, 18, 20, 22, 25],
-      [23, 22, 20, 19, 17, 16, 15, 13, 15, 16, 19, 21, 23],
-      [25, 24, 22, 20, 19, 18, 16, 15, 13, 14, 17, 19, 22],
-      [26, 25, 23, 22, 20, 19, 18, 16, 14, 13, 16, 18, 21],
-      [28, 27, 26, 24, 22, 21, 20, 19, 17, 16, 13, 15, 18],
-      [31, 29, 28, 26, 24, 23, 22, 21, 19, 18, 15, 13, 16],
+      [13, 15, 16, 18, 19, 21, 22, 23, 25, 26, 28, 31, 33], [15, 13, 15, 17, 18, 19, 21, 22, 24, 25, 27, 29, 32], [16, 15, 13, 15, 16, 18, 19, 20, 22, 23, 26, 28, 30],
+      [18, 17, 15, 13, 15, 16, 17, 19, 20, 22, 24, 26, 29], [19, 18, 16, 15, 13, 14, 16, 17, 19, 20, 22, 24, 27], [21, 19, 18, 16, 14, 13, 15, 16, 18, 19, 21, 23, 26],
+      [22, 21, 19, 17, 16, 15, 13, 15, 16, 18, 20, 22, 25], [23, 22, 20, 19, 17, 16, 15, 13, 15, 16, 19, 21, 23], [25, 24, 22, 20, 19, 18, 16, 15, 13, 14, 17, 19, 22],
+      [26, 25, 23, 22, 20, 19, 18, 16, 14, 13, 16, 18, 21], [28, 27, 26, 24, 22, 21, 20, 19, 17, 16, 13, 15, 18], [31, 29, 28, 26, 24, 23, 22, 21, 19, 18, 15, 13, 16],
       [33, 32, 30, 29, 27, 26, 25, 23, 22, 21, 18, 16, 13]
     ];
 
     function calculateFare() {
-      let start = parseInt(document.getElementById('start-station').value);
-      let end = parseInt(document.getElementById('end-station').value);
-      let isSingleJourney = document.getElementById('ticket-type').value === "sj";
-      let isDiscounted = document.getElementById('discount-type').value === "disc";
-      let priceDisplay = document.getElementById('fare-price');
-
-      if (start === end) {
-        priceDisplay.innerText = "0";
-      } else {
-        let svReg = fareMatrix[start][end];
-        let finalFare = svReg;
-        if (isSingleJourney) finalFare = Math.ceil(svReg / 5) * 5;
+      let start = parseInt(document.getElementById('start-station').value); let end = parseInt(document.getElementById('end-station').value);
+      let isSingleJourney = document.getElementById('ticket-type').value === "sj"; let isDiscounted = document.getElementById('discount-type').value === "disc";
+      if (start === end) { document.getElementById('fare-price').innerText = "0"; } else {
+        let finalFare = fareMatrix[start][end];
+        if (isSingleJourney) finalFare = Math.ceil(finalFare / 5) * 5;
         if (isDiscounted) finalFare = isSingleJourney ? Math.round(finalFare / 2) : (finalFare / 2).toFixed(2);
-        priceDisplay.innerHTML = "&#8369;" + finalFare;
+        document.getElementById('fare-price').innerHTML = "&#8369;" + finalFare;
       }
     }
-    calculateFare(); // Run once on load
+    calculateFare();
 
     // --- FRIENDS UI ---
     const stationsList = ["Recto", "Legarda", "Pureza", "V. Mapa", "J. Ruiz", "Gilmore", "Betty Go", "Cubao", "Anonas", "Katipunan", "Santolan", "Marikina", "Antipolo"];
@@ -222,20 +188,17 @@
 
     function renderFriends() {
       let html = "";
-      if (friends.length === 0) {
-        html = "<p style='color:#888; font-style:italic;'>No friends added yet.</p>";
-      } else {
+      if (friends.length === 0) { html = "<p style='color:#888; font-style:italic;'>No friends added yet.</p>"; } else {
         friends.forEach(f => {
           html += `<div class="friend-row">
                     <div style="display:flex; justify-content:space-between;">
                       <div><strong style="font-size: 18px;">${f.name}</strong> <span style="color:#666; font-size: 12px;">ID: ${f.id}</span></div>
                       <button class="unfriend-btn" onclick="removeFriend('${f.id}')">❌</button>
                     </div>
-                    
                     <div class="friend-actions">
                       <select id="car-select-${f.id}" style="width: 30%; margin:0;"><option value="1">Car 1</option><option value="2">Car 2</option><option value="3">Car 3</option></select>
                       <select id="dest-select-${f.id}" style="width: 40%; margin:0;">${stationOptions}</select>
-                      <button class="friend-btn" onclick="broadcastTrip('${f.id}')">📡 Send</button>
+                      <button class="friend-btn" onclick="startBroadcast('${f.id}')">📡 Send</button>
                     </div>
                    </div>`;
         });
@@ -245,78 +208,102 @@
     renderFriends();
 
     function addFriend() {
-      let newId = document.getElementById("friend-id-input").value;
-      let newName = document.getElementById("friend-name-input").value || "Friend";
+      let newId = document.getElementById("friend-id-input").value; let newName = document.getElementById("friend-name-input").value || "Friend";
       if (newId.length === 4 && newId !== myId && !friends.find(f => f.id === newId)) {
-        friends.push({id: newId, name: newName});
-        localStorage.setItem("artie_friends_v2", JSON.stringify(friends));
-        document.getElementById("friend-id-input").value = "";
-        document.getElementById("friend-name-input").value = "";
-        renderFriends();
+        friends.push({id: newId, name: newName}); localStorage.setItem("artie_friends_v2", JSON.stringify(friends));
+        document.getElementById("friend-id-input").value = ""; document.getElementById("friend-name-input").value = ""; renderFriends();
       } else { alert("Invalid or duplicate ID."); }
     }
-
-    function removeFriend(id) {
-      if(confirm("Remove this friend?")) {
-        friends = friends.filter(f => f.id !== id);
-        localStorage.setItem("artie_friends_v2", JSON.stringify(friends));
-        renderFriends();
-      }
-    }
+    function removeFriend(id) { if(confirm("Remove this friend?")) { friends = friends.filter(f => f.id !== id); localStorage.setItem("artie_friends_v2", JSON.stringify(friends)); renderFriends(); } }
 
     function switchMainTab(viewId, tabId) {
       document.querySelectorAll('.view').forEach(el => el.classList.remove('active-view'));
       document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
-      document.getElementById(viewId).classList.add('active-view');
-      document.getElementById(tabId).classList.add('active');
+      document.getElementById(viewId).classList.add('active-view'); document.getElementById(tabId).classList.add('active');
     }
-    function switchDetail(viewId) {
-      document.querySelectorAll('.view').forEach(el => el.classList.remove('active-view'));
-      document.getElementById(viewId).classList.add('active-view');
-    }
+    function switchDetail(viewId) { document.querySelectorAll('.view').forEach(el => el.classList.remove('active-view')); document.getElementById(viewId).classList.add('active-view'); }
 
-    // --- DATA & CLOUD SYNC ---
+    // --- NEW: CATEGORIZED GIMMICKS DICTIONARY ---
     const gimmicks = {
-      "Katipunan": ["🍻 Pop Up Katipunan", "🛍️ UP Town Center", "📚 Ateneo Art Gallery"],
-      "Cubao": ["🛍️ Ali Mall", "🍻 Cubao Expo", "🎨 Art in Island"],
-      "Legarda": ["☕️ Local Cafes", "🏛️ National Museum"],
-      "Default": ["🏪 Convenience Store", "☕️ Nearby Coffee Shop"]
+      "Katipunan": {
+        eat: ["📍 Pop Up Katipunan", "🍽️ Gino's Brick Oven Pizza"], ent: ["📚 Ateneo Art Gallery", "🌳 UP Sunken Garden"],
+        edu: ["🎓 Ateneo de Manila", "🎓 UP Diliman", "🎓 Miriam College"], other: ["🛍️ UP Town Center"]
+      },
+      "Cubao": {
+        eat: ["🍽️ Bellini's", "🍻 Cubao Expo"], ent: ["🎨 Art in Island", "🎭 New Frontier Theater", "🏀 Smart Araneta Coliseum"],
+        edu: ["🎓 TIP Cubao"], other: ["🛍️ Ali Mall", "🛒 Gateway Mall", "🚌 Araneta Bus Port"]
+      },
+      "Legarda": {
+        eat: ["☕️ Cafe UK", "🍩 Local Bakeries"], ent: ["🏛️ National Museum (Short Ride)"],
+        edu: ["🎓 San Beda University", "🎓 CEU", "🎓 Arellano University"], other: ["📚 Recto Bookstores"]
+      },
+      "Default": {
+        eat: ["🍔 Local Eatery", "☕️ Coffee Shop"], ent: [], edu: [], other: ["🏪 Convenience Store", "🏧 ATM / Bank"]
+      }
     };
 
-    const scriptBaseURL = "https://script.google.com/macros/s/AKfycbxcPJfHKZYBLjKcnLur200nKnv3IPJYKftf_9PWq2UkV8fo4jzYrJTrV7PFLqCJ6Yaa/exec";
+    const scriptBaseURL = "https://script.google.com/macros/s/AKfycbz0EeheEfzywcAIMLD2xQQe0WgJlUM8jmdBdIi7C-i2mg5pH726Vv-jAyZ3QvtHNiQE/exec";
 
-    function broadcastTrip(friendId) {
-      let car = document.getElementById(`car-select-${friendId}`).value;
-      let dest = document.getElementById(`dest-select-${friendId}`).value;
-      
+    // --- BROADCAST CONTROLS ---
+    function startBroadcast(friendId) {
+      let car = document.getElementById(`car-select-${friendId}`).value; let dest = document.getElementById(`dest-select-${friendId}`).value;
       fetch(`${scriptBaseURL}?action=share&from=${myId}&to=${friendId}&car=${car}&dest=${dest}`, { mode: 'no-cors' })
-        .then(() => alert(`Trip details sent to ${friendId}!`))
-        .catch(err => alert("Error connecting."));
+        .then(() => {
+          alert(`Trip shared! You are now broadcasting.`);
+          document.getElementById("stop-broadcast-btn").style.display = "block"; // Reveal the Stop button
+        }).catch(err => alert("Error connecting."));
     }
 
-    function forceUIRefresh() {
-      if(currentGlobalData) updateUI(currentGlobalData);
+    function stopMyBroadcast() {
+      fetch(`${scriptBaseURL}?action=stop_share&from=${myId}`, { mode: 'no-cors' })
+        .then(() => {
+          alert("Your broadcast has been turned off.");
+          document.getElementById("stop-broadcast-btn").style.display = "none"; // Hide the Stop button
+        });
     }
+
+    // Dismiss a friend's trip when they arrive
+    function dismissFriendTrip() {
+      document.getElementById("trip-selector").value = "me";
+      forceUIRefresh();
+    }
+
+    function forceUIRefresh() { if(currentGlobalData) updateUI(currentGlobalData); }
 
     function updateUI(data) {
+      // --- NOTIFICATION ALERT LOGIC ---
+      if (data.activeShares) {
+        Object.keys(data.activeShares).forEach(friendId => {
+          if (!knownShares.includes(friendId)) {
+            let fObj = friends.find(f => f.id == friendId);
+            let n = fObj ? fObj.name : "ID " + friendId;
+            alert(`🔔 ${n} just started sharing their trip with you!`);
+            knownShares.push(friendId);
+          }
+        });
+        // Clean up knownShares if they stop sharing
+        knownShares = knownShares.filter(id => data.activeShares[id]);
+      } else {
+        knownShares = [];
+      }
+
+      // --- UI UPDATES ---
       let selector = document.getElementById("trip-selector");
       let selectedView = selector.value; 
 
       let optionsHtml = `<option value="me">My Trip</option>`;
       if (data.activeShares) {
         Object.keys(data.activeShares).forEach(friendId => {
-          let friendObj = friends.find(f => f.id == friendId);
-          let name = friendObj ? friendObj.name : "ID " + friendId;
+          let friendObj = friends.find(f => f.id == friendId); let name = friendObj ? friendObj.name : "ID " + friendId;
           optionsHtml += `<option value="${friendId}">${name}'s Trip</option>`;
         });
       }
       selector.innerHTML = optionsHtml;
       
-      if (selectedView === "me" || data.activeShares[selectedView]) {
+      if (selectedView === "me" || (data.activeShares && data.activeShares[selectedView])) {
         selector.value = selectedView;
       } else {
-        selectedView = "me"; 
-        selector.value = "me";
+        selectedView = "me"; selector.value = "me";
       }
 
       let banner = document.getElementById("share-banner");
@@ -324,44 +311,53 @@
       let stationName = data.currentStation;
 
       if (selectedView === "me") {
-        banner.style.display = "none";
-        banner.className = "";
-        document.getElementById('main-occ').innerText = bestText;
+        banner.style.display = "none"; banner.className = ""; document.getElementById('main-occ').innerText = bestText;
       } else {
         let shareInfo = data.activeShares[selectedView];
-        let friendObj = friends.find(f => f.id == selectedView);
-        let name = friendObj ? friendObj.name : "Friend";
+        let friendObj = friends.find(f => f.id == selectedView); let name = friendObj ? friendObj.name : "Friend";
         
         banner.style.display = "block";
         
         if (data.currentStation === shareInfo.dest) {
           banner.className = "arrived-banner";
-          banner.innerText = `🎉 ${name} arrived at ${shareInfo.dest}!`;
+          // NEW: Added a Dismiss Button right inside the banner!
+          banner.innerHTML = `🎉 ${name} arrived at ${shareInfo.dest}! <button onclick="dismissFriendTrip()" style="margin-left: 10px; padding: 6px 12px; border-radius: 6px; border: none; background: white; color: #4caf50; font-weight: bold; cursor: pointer;">Dismiss</button>`;
           document.getElementById('main-occ').innerText = `Trip Complete`;
           document.getElementById('main-occ').style.color = "#4caf50";
         } else {
           banner.className = "";
           banner.innerText = `👀 Viewing ${name}'s Trip (Car ${shareInfo.car} to ${shareInfo.dest})`;
-          
           let friendCarOcc = data.allCars[shareInfo.car - 1]; 
           document.getElementById('main-occ').innerText = `Car ${shareInfo.car} : ${friendCarOcc}% full`;
           
           let mainOcc = document.getElementById('main-occ');
-          if(friendCarOcc < 50) mainOcc.style.color = "#4caf50";
-          else if(friendCarOcc < 80) mainOcc.style.color = "#ffeb3b";
-          else mainOcc.style.color = "#f44336";
+          if(friendCarOcc < 50) mainOcc.style.color = "#4caf50"; else if(friendCarOcc < 80) mainOcc.style.color = "#ffeb3b"; else mainOcc.style.color = "#f44336";
         }
       }
 
       document.getElementById('main-prev-label').innerText = "Left " + stationName + ":";
       document.getElementById('prev-station-time').innerText = data.currentTime;
       
+      // --- RENDER CATEGORIZED GIMMICKS ---
       document.getElementById('gimmick-title').innerText = "Spots near " + stationName + ":";
       let spots = gimmicks[stationName] || gimmicks["Default"];
       let spotsHtml = "";
-      for(let i=0; i < spots.length; i++) spotsHtml += "<div class='gimmick-item'>" + spots[i] + "</div>";
+      
+      if (spots.eat && spots.eat.length > 0) {
+        spotsHtml += `<div class="cat-title">🍽️ Places to Eat</div>` + spots.eat.map(s => `<div class='gimmick-item'>${s}</div>`).join('');
+      }
+      if (spots.ent && spots.ent.length > 0) {
+        spotsHtml += `<div class="cat-title">🎭 Entertainment</div>` + spots.ent.map(s => `<div class='gimmick-item'>${s}</div>`).join('');
+      }
+      if (spots.edu && spots.edu.length > 0) {
+        spotsHtml += `<div class="cat-title">🎓 Schools</div>` + spots.edu.map(s => `<div class='gimmick-item'>${s}</div>`).join('');
+      }
+      if (spots.other && spots.other.length > 0) {
+        spotsHtml += `<div class="cat-title">🛍️ Others</div>` + spots.other.map(s => `<div class='gimmick-item'>${s}</div>`).join('');
+      }
       document.getElementById('gimmick-list').innerHTML = spotsHtml;
 
+      // Update Cars Table
       let carsHtml = "<tr><th>Other cars</th><th>capacity</th></tr>";
       for(let i=0; i < data.allCars.length; i++) {
         let isBest = (selectedView === "me" && data.allCars[i] === data.bestCarOcc) || (selectedView !== "me" && i+1 == data.activeShares[selectedView]?.car) ? "style='color: #4caf50; font-weight:bold;'" : "";
@@ -376,14 +372,11 @@
         .then(response => response.json())
         .then(data => {
           if(!data.error) {
-            currentGlobalData = data;
-            updateUI(data);
+            currentGlobalData = data; updateUI(data);
           }
         }).catch(err => console.error('Fetch error:', err));
     }
-
-    fetchTrainData();
-    setInterval(fetchTrainData, 5000);
+    fetchTrainData(); setInterval(fetchTrainData, 5000);
   </script>
 </body>
 </html>
