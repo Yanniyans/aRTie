@@ -22,10 +22,9 @@
     .input-row { display: flex; gap: 10px; margin-bottom: 10px; }
     input, select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; width: 100%; box-sizing: border-box;}
     
-    .friend-row { background: #f9f9f9; padding: 10px; border-radius: 6px; margin-bottom: 8px; border: 1px solid #eee;}
-    .friend-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 10px;}
-    .friend-btn { background: #ff9800; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer;}
-    .unfriend-btn { background: #f44336; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer;}
+    .friend-row { background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 12px; border: 1px solid #e0e0e0;}
+    .unfriend-btn { background: #f44336; color: white; border: none; padding: 6px 10px; border-radius: 6px; font-weight: bold; cursor: pointer;}
+    .broadcast-box { background: #eeeeee; padding: 12px; border-radius: 8px; margin-top: 10px; border: 1px solid #ddd;}
     
     .fare-grid { display: flex; justify-content: space-between; align-items: center; }
     .fare-col { width: 48%; }
@@ -148,7 +147,6 @@
   </div>
 
   <script>
-    // System Setup
     let myId = localStorage.getItem("artie_id");
     if (!myId) {
       myId = Math.floor(1000 + Math.random() * 9000).toString(); 
@@ -158,7 +156,7 @@
 
     let friends = JSON.parse(localStorage.getItem("artie_friends_v2") || "[]");
     let currentGlobalData = null; 
-    let knownShares = []; // Tracks who is currently sharing with us for the Notification Alert
+    let knownShares = []; 
 
     // --- FARE CALCULATOR ---
     const fareMatrix = [
@@ -190,17 +188,25 @@
       let html = "";
       if (friends.length === 0) { html = "<p style='color:#888; font-style:italic;'>No friends added yet.</p>"; } else {
         friends.forEach(f => {
-          html += `<div class="friend-row">
-                    <div style="display:flex; justify-content:space-between;">
-                      <div><strong style="font-size: 18px;">${f.name}</strong> <span style="color:#666; font-size: 12px;">ID: ${f.id}</span></div>
-                      <button class="unfriend-btn" onclick="removeFriend('${f.id}')">❌</button>
-                    </div>
-                    <div class="friend-actions">
-                      <select id="car-select-${f.id}" style="width: 30%; margin:0;"><option value="1">Car 1</option><option value="2">Car 2</option><option value="3">Car 3</option></select>
-                      <select id="dest-select-${f.id}" style="width: 40%; margin:0;">${stationOptions}</select>
-                      <button class="friend-btn" onclick="startBroadcast('${f.id}')">📡 Send</button>
-                    </div>
-                   </div>`;
+          html += `
+            <div class="friend-row">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div><strong style="font-size: 20px;">${f.name}</strong> <span style="color:#666; font-size: 14px;">(ID: ${f.id})</span></div>
+                <button class="unfriend-btn" onclick="removeFriend('${f.id}')" title="Remove Friend">❌</button>
+              </div>
+              
+              <div class="broadcast-box">
+                <div style="font-size: 13px; color: #444; margin-bottom: 8px; font-weight: bold; text-transform: uppercase;">
+                  ▶ When I broadcast, I'll be in:
+                </div>
+                <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 12px;">
+                  <select id="car-select-${f.id}" style="flex: 1; margin:0;"><option value="1">Car 1</option><option value="2">Car 2</option><option value="3">Car 3</option></select>
+                  <span style="font-size: 13px; color: #666; font-weight: bold;"> going to </span>
+                  <select id="dest-select-${f.id}" style="flex: 1.5; margin:0;">${stationOptions}</select>
+                </div>
+                <button class="btn btn-action" style="margin:0;" onclick="startBroadcast('${f.id}')">📡 Broadcast Trip to ${f.name}</button>
+              </div>
+            </div>`;
         });
       }
       document.getElementById("friends-list-container").innerHTML = html;
@@ -223,73 +229,58 @@
     }
     function switchDetail(viewId) { document.querySelectorAll('.view').forEach(el => el.classList.remove('active-view')); document.getElementById(viewId).classList.add('active-view'); }
 
-    // --- NEW: CATEGORIZED GIMMICKS DICTIONARY ---
+    // --- CATEGORIZED GIMMICKS DICTIONARY ---
     const gimmicks = {
-      "Katipunan": {
-        eat: ["📍 Pop Up Katipunan", "🍽️ Gino's Brick Oven Pizza"], ent: ["📚 Ateneo Art Gallery", "🌳 UP Sunken Garden"],
-        edu: ["🎓 Ateneo de Manila", "🎓 UP Diliman", "🎓 Miriam College"], other: ["🛍️ UP Town Center"]
-      },
-      "Cubao": {
-        eat: ["🍽️ Bellini's", "🍻 Cubao Expo"], ent: ["🎨 Art in Island", "🎭 New Frontier Theater", "🏀 Smart Araneta Coliseum"],
-        edu: ["🎓 TIP Cubao"], other: ["🛍️ Ali Mall", "🛒 Gateway Mall", "🚌 Araneta Bus Port"]
-      },
-      "Legarda": {
-        eat: ["☕️ Cafe UK", "🍩 Local Bakeries"], ent: ["🏛️ National Museum (Short Ride)"],
-        edu: ["🎓 San Beda University", "🎓 CEU", "🎓 Arellano University"], other: ["📚 Recto Bookstores"]
-      },
-      "Default": {
-        eat: ["🍔 Food", "☕️ Coffee"], ent: ["Fun place to go"], edu: ["School"], other: ["🏪 7/11", "🏧 BPI"]
-      }
+      "Katipunan": { eat: ["Pop Up", "Gino's Brick Oven Pizza"], ent: ["Ateneo Art Gallery", "UP Sunken Garden"], edu: ["Ateneo", "UP Diliman", "Miriam"], other: ["UP Town Center"] },
+      "Cubao": { eat: ["Bellini's", "Cubao Expo"], ent: ["Art in Island", "Smart Araneta Coliseum"], edu: ["TIP Cubao"], other: ["Ali Mall", "Gateway Mall"] },
+      "Legarda": { eat: ["Cafe UK"], ent: ["National Museum"], edu: ["San Beda", "CEU", "Arellano"], other: ["Recto Bookstores"] },
+      "Default": { eat: ["Food"], ent: ["Entertainment"], edu: ["School"], other: ["7/11"] }
     };
 
-    const scriptBaseURL = "https://script.google.com/macros/s/AKfycbz0EeheEfzywcAIMLD2xQQe0WgJlUM8jmdBdIi7C-i2mg5pH726Vv-jAyZ3QvtHNiQE/exec";
+    const scriptBaseURL = "https://script.google.com/macros/s/AKfycbxcPJfHKZYBLjKcnLur200nKnv3IPJYKftf_9PWq2UkV8fo4jzYrJTrV7PFLqCJ6Yaa/exec";
 
     // --- BROADCAST CONTROLS ---
     function startBroadcast(friendId) {
       let car = document.getElementById(`car-select-${friendId}`).value; let dest = document.getElementById(`dest-select-${friendId}`).value;
-      fetch(`${scriptBaseURL}?action=share&from=${myId}&to=${friendId}&car=${car}&dest=${dest}`, { mode: 'no-cors' })
-        .then(() => {
-          alert(`Trip shared! You are now broadcasting.`);
-          document.getElementById("stop-broadcast-btn").style.display = "block"; // Reveal the Stop button
-        }).catch(err => alert("Error connecting."));
+      
+      // Removed 'no-cors' so we can actually read the success response from the server!
+      fetch(`${scriptBaseURL}?action=share&from=${myId}&to=${friendId}&car=${car}&dest=${dest}`)
+        .then(res => res.json())
+        .then(data => {
+          if(data.success) {
+            alert(`Trip details safely logged to cloud! Broadcasting to ${friendId}.`);
+            document.getElementById("stop-broadcast-btn").style.display = "block";
+          }
+        }).catch(err => alert("Error syncing. Did you remember to deploy the NEW VERSION of your Google Script?"));
     }
 
     function stopMyBroadcast() {
-      fetch(`${scriptBaseURL}?action=stop_share&from=${myId}`, { mode: 'no-cors' })
-        .then(() => {
-          alert("Your broadcast has been turned off.");
-          document.getElementById("stop-broadcast-btn").style.display = "none"; // Hide the Stop button
-        });
+      fetch(`${scriptBaseURL}?action=stop_share&from=${myId}`)
+        .then(res => res.json())
+        .then(data => {
+          if(data.success) {
+            alert("Broadcast turned off successfully.");
+            document.getElementById("stop-broadcast-btn").style.display = "none";
+          }
+        }).catch(err => alert("Error connecting."));
     }
 
-    // Dismiss a friend's trip when they arrive
-    function dismissFriendTrip() {
-      document.getElementById("trip-selector").value = "me";
-      forceUIRefresh();
-    }
-
+    function dismissFriendTrip() { document.getElementById("trip-selector").value = "me"; forceUIRefresh(); }
     function forceUIRefresh() { if(currentGlobalData) updateUI(currentGlobalData); }
 
     function updateUI(data) {
-      // --- NOTIFICATION ALERT LOGIC ---
       if (data.activeShares) {
         Object.keys(data.activeShares).forEach(friendId => {
           if (!knownShares.includes(friendId)) {
-            let fObj = friends.find(f => f.id == friendId);
-            let n = fObj ? fObj.name : "ID " + friendId;
+            let fObj = friends.find(f => f.id == friendId); let n = fObj ? fObj.name : "ID " + friendId;
             alert(`🔔 ${n} just started sharing their trip with you!`);
             knownShares.push(friendId);
           }
         });
-        // Clean up knownShares if they stop sharing
         knownShares = knownShares.filter(id => data.activeShares[id]);
-      } else {
-        knownShares = [];
-      }
+      } else { knownShares = []; }
 
-      // --- UI UPDATES ---
-      let selector = document.getElementById("trip-selector");
-      let selectedView = selector.value; 
+      let selector = document.getElementById("trip-selector"); let selectedView = selector.value; 
 
       let optionsHtml = `<option value="me">My Trip</option>`;
       if (data.activeShares) {
@@ -300,11 +291,8 @@
       }
       selector.innerHTML = optionsHtml;
       
-      if (selectedView === "me" || (data.activeShares && data.activeShares[selectedView])) {
-        selector.value = selectedView;
-      } else {
-        selectedView = "me"; selector.value = "me";
-      }
+      if (selectedView === "me" || (data.activeShares && data.activeShares[selectedView])) { selector.value = selectedView; } 
+      else { selectedView = "me"; selector.value = "me"; }
 
       let banner = document.getElementById("share-banner");
       let bestText = data.bestCarName + " : " + data.bestCarOcc + "% full";
@@ -317,16 +305,12 @@
         let friendObj = friends.find(f => f.id == selectedView); let name = friendObj ? friendObj.name : "Friend";
         
         banner.style.display = "block";
-        
         if (data.currentStation === shareInfo.dest) {
           banner.className = "arrived-banner";
-          // NEW: Added a Dismiss Button right inside the banner!
           banner.innerHTML = `🎉 ${name} arrived at ${shareInfo.dest}! <button onclick="dismissFriendTrip()" style="margin-left: 10px; padding: 6px 12px; border-radius: 6px; border: none; background: white; color: #4caf50; font-weight: bold; cursor: pointer;">Dismiss</button>`;
-          document.getElementById('main-occ').innerText = `Trip Complete`;
-          document.getElementById('main-occ').style.color = "#4caf50";
+          document.getElementById('main-occ').innerText = `Trip Complete`; document.getElementById('main-occ').style.color = "#4caf50";
         } else {
-          banner.className = "";
-          banner.innerText = `👀 Viewing ${name}'s Trip (Car ${shareInfo.car} to ${shareInfo.dest})`;
+          banner.className = ""; banner.innerText = `👀 Viewing ${name}'s Trip (Car ${shareInfo.car} to ${shareInfo.dest})`;
           let friendCarOcc = data.allCars[shareInfo.car - 1]; 
           document.getElementById('main-occ').innerText = `Car ${shareInfo.car} : ${friendCarOcc}% full`;
           
@@ -338,26 +322,15 @@
       document.getElementById('main-prev-label').innerText = "Left " + stationName + ":";
       document.getElementById('prev-station-time').innerText = data.currentTime;
       
-      // --- RENDER CATEGORIZED GIMMICKS ---
       document.getElementById('gimmick-title').innerText = "Spots near " + stationName + ":";
-      let spots = gimmicks[stationName] || gimmicks["Default"];
-      let spotsHtml = "";
+      let spots = gimmicks[stationName] || gimmicks["Default"]; let spotsHtml = "";
       
-      if (spots.eat && spots.eat.length > 0) {
-        spotsHtml += `<div class="cat-title">🍽️ Places to Eat</div>` + spots.eat.map(s => `<div class='gimmick-item'>${s}</div>`).join('');
-      }
-      if (spots.ent && spots.ent.length > 0) {
-        spotsHtml += `<div class="cat-title">🎭 Entertainment</div>` + spots.ent.map(s => `<div class='gimmick-item'>${s}</div>`).join('');
-      }
-      if (spots.edu && spots.edu.length > 0) {
-        spotsHtml += `<div class="cat-title">🎓 Schools</div>` + spots.edu.map(s => `<div class='gimmick-item'>${s}</div>`).join('');
-      }
-      if (spots.other && spots.other.length > 0) {
-        spotsHtml += `<div class="cat-title">🛍️ Others</div>` + spots.other.map(s => `<div class='gimmick-item'>${s}</div>`).join('');
-      }
+      if (spots.eat && spots.eat.length > 0) spotsHtml += `<div class="cat-title">🍽️ Places to Eat</div>` + spots.eat.map(s => `<div class='gimmick-item'>${s}</div>`).join('');
+      if (spots.ent && spots.ent.length > 0) spotsHtml += `<div class="cat-title">🎭 Entertainment</div>` + spots.ent.map(s => `<div class='gimmick-item'>${s}</div>`).join('');
+      if (spots.edu && spots.edu.length > 0) spotsHtml += `<div class="cat-title">🎓 Schools</div>` + spots.edu.map(s => `<div class='gimmick-item'>${s}</div>`).join('');
+      if (spots.other && spots.other.length > 0) spotsHtml += `<div class="cat-title">🛍️ Others</div>` + spots.other.map(s => `<div class='gimmick-item'>${s}</div>`).join('');
       document.getElementById('gimmick-list').innerHTML = spotsHtml;
 
-      // Update Cars Table
       let carsHtml = "<tr><th>Other cars</th><th>capacity</th></tr>";
       for(let i=0; i < data.allCars.length; i++) {
         let isBest = (selectedView === "me" && data.allCars[i] === data.bestCarOcc) || (selectedView !== "me" && i+1 == data.activeShares[selectedView]?.car) ? "style='color: #4caf50; font-weight:bold;'" : "";
@@ -368,13 +341,7 @@
     }
 
     function fetchTrainData() {
-      fetch(`${scriptBaseURL}?action=read&myId=${myId}`)
-        .then(response => response.json())
-        .then(data => {
-          if(!data.error) {
-            currentGlobalData = data; updateUI(data);
-          }
-        }).catch(err => console.error('Fetch error:', err));
+      fetch(`${scriptBaseURL}?action=read&myId=${myId}`).then(r => r.json()).then(data => { if(!data.error) { currentGlobalData = data; updateUI(data); } }).catch(e => console.log(e));
     }
     fetchTrainData(); setInterval(fetchTrainData, 5000);
   </script>
