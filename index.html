@@ -237,13 +237,13 @@
       "Default": { eat: ["Food"], ent: ["Entertainment"], edu: ["School"], other: ["7/11"] }
     };
 
-    const scriptBaseURL = "https://script.google.com/macros/s/AKfycbyfxT6wm_cF6AhGWjOANd5OoEhycusPDHkh_8lz54TU_HKmwBdZ_0pvGJEro91Bzwdb/exec";
+    // Make sure this URL is correct!
+    const scriptBaseURL = "https://script.google.com/macros/s/AKfycbxVBOQVZo_oz6ntaf6PYtkRC9tvD3OTyGlc94Vr8oE3_ocAJ746N0nxbwIpgnFSV0th/exec";
 
     // --- BROADCAST CONTROLS ---
     function startBroadcast(friendId) {
       let car = document.getElementById(`car-select-${friendId}`).value; let dest = document.getElementById(`dest-select-${friendId}`).value;
       
-      // Removed 'no-cors' so we can actually read the success response from the server!
       fetch(`${scriptBaseURL}?action=share&from=${myId}&to=${friendId}&car=${car}&dest=${dest}`)
         .then(res => res.json())
         .then(data => {
