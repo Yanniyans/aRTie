@@ -66,6 +66,7 @@
     <div id="share-banner">👀 Viewing Trip!</div>
 
     <button id="stop-broadcast-btn" class="unfriend-btn" style="display:none; width:100%; margin-bottom:15px; font-size:16px; padding:12px;" onclick="stopMyBroadcast()">🛑 Stop Broadcasting My Trip</button>
+    <button id="stop-following-btn" class="unfriend-btn" style="display:none; width:100%; margin-bottom:15px; font-size:16px; padding:12px; background-color: #ff9800;" onclick="stopFollowingFriend()">🛑 Stop Following Friend's Trip</button>
 
     <div class="card nav-card" onclick="switchDetail('view-cars')">
       <h3>least occupied car:</h3>
@@ -265,6 +266,19 @@
         }).catch(err => alert("Error connecting."));
     }
 
+    // --- NEW: STOP FOLLOWING FUNCTION ---
+    function stopFollowingFriend() {
+      fetch(`${scriptBaseURL}?action=stop_share&myId=${myId}`)
+        .then(res => res.json())
+        .then(data => {
+          if(data.success) {
+            alert("You have stopped following the broadcast.");
+            document.getElementById("trip-selector").value = "me";
+            forceUIRefresh();
+          }
+        }).catch(err => alert("Error connecting."));
+    }
+
     function dismissFriendTrip() { document.getElementById("trip-selector").value = "me"; forceUIRefresh(); }
     function forceUIRefresh() { if(currentGlobalData) updateUI(currentGlobalData); }
 
@@ -298,8 +312,10 @@
       let bestText = data.bestCarName + " : " + data.bestCarOcc + "% full";
       let stationName = data.currentStation;
 
+      // --- NEW LOGIC: SHOW/HIDE STOP FOLLOWING BUTTON ---
       if (selectedView === "me") {
         banner.style.display = "none"; banner.className = ""; document.getElementById('main-occ').innerText = bestText;
+        document.getElementById('stop-following-btn').style.display = 'none'; // Hide when viewing own trip
       } else {
         let shareInfo = data.activeShares[selectedView];
         let friendObj = friends.find(f => f.id == selectedView); let name = friendObj ? friendObj.name : "Friend";
@@ -309,6 +325,7 @@
           banner.className = "arrived-banner";
           banner.innerHTML = `🎉 ${name} arrived at ${shareInfo.dest}! <button onclick="dismissFriendTrip()" style="margin-left: 10px; padding: 6px 12px; border-radius: 6px; border: none; background: white; color: #4caf50; font-weight: bold; cursor: pointer;">Dismiss</button>`;
           document.getElementById('main-occ').innerText = `Trip Complete`; document.getElementById('main-occ').style.color = "#4caf50";
+          document.getElementById('stop-following-btn').style.display = 'none'; // Hide if arrived
         } else {
           banner.className = ""; banner.innerText = `👀 Viewing ${name}'s Trip (Car ${shareInfo.car} to ${shareInfo.dest})`;
           let friendCarOcc = data.allCars[shareInfo.car - 1]; 
@@ -316,6 +333,7 @@
           
           let mainOcc = document.getElementById('main-occ');
           if(friendCarOcc < 50) mainOcc.style.color = "#4caf50"; else if(friendCarOcc < 80) mainOcc.style.color = "#ffeb3b"; else mainOcc.style.color = "#f44336";
+          document.getElementById('stop-following-btn').style.display = 'block'; // Show when following
         }
       }
 
