@@ -232,40 +232,119 @@
 
     // --- CATEGORIZED GIMMICKS DICTIONARY ---
     const gimmicks = {
-      "Katipunan": { 
-        eat: ["Pop Up", "Gino's Brick Oven Pizza"], 
-        ent: ["Ateneo Art Gallery", "UP Sunken Garden"], 
-        edu: ["Ateneo", "UP Diliman", "Miriam"], 
-        mall: ["UP Town Center", "SM Marikina (via trike)"],
-        church: ["Santa Maria della Strada Parish", "Church of the Gesu"],
-        other: ["Tricycle Terminal"] 
-      },
-      "Cubao": { 
-        eat: ["Bellini's", "Cubao Expo"], 
-        ent: ["Art in Island", "Smart Araneta Coliseum"], 
-        edu: ["TIP Cubao"], 
-        mall: ["Gateway Mall", "Ali Mall", "Farmers Plaza"],
-        church: ["Our Lady of Perpetual Help", "Christ the King"],
-        other: ["Bus Terminal"] 
+      "Recto": {
+        eat: ["Isetann Food Court", "Binondo"],
+        ent: ["Odeon Mall Cinemas", "Escolta Historical Walk"],
+        edu: ["FEU", "UE", "San Sebastian College", "Avanceña High School"],
+        mall: ["Isetann Recto", "Odeon Terminal Mall", "Cartimar Recto"],
+        church: ["Quiapo Church", "Minor Basilica of San Sebastian"],
+        other: ["Recto Bookstores", "JCM Cargo Main Office"]
       },
       "Legarda": { 
-        eat: ["Cafe UK"], 
-        ent: ["National Museum"], 
-        edu: ["San Beda", "CEU", "Arellano"], 
-        mall: ["SM Manila (nearby)", "Isetann Recto"],
-        church: ["San Sebastian Church", "Quiapo Church"],
-        other: ["Recto Bookstores"] 
+        eat: ["Cafe UK Co-Working", "Mendiola Food Stalls"], 
+        ent: ["National Museum", "Malacañang Heritage Tour"], 
+        edu: ["San Beda University", "Centro Escolar University (CEU)", "Arellano University", "UST"], 
+        mall: ["Isetann Recto", "SM City Manila"],
+        church: ["San Sebastian Church", "Abbey of Our Lady of Montserrat"],
+        other: ["Mendiola Peace Arch"] 
+      },
+      "Pureza": {
+        eat: ["PUP Lagoon Food Court", "Pureza Street Food Market"],
+        ent: ["PUP Linear Park", "El Pueblo Ground"],
+        edu: ["Polytechnic University of the Philippines (PUP)", "EARIST", "Sacred Heart Catholic School"],
+        mall: ["Puregold Pureza", "Savemore Market"],
+        church: ["Sacred Heart of Jesus Parish"],
+        other: ["PUP Ferry Station"]
+      },
+      "V. Mapa": {
+        eat: ["SM Santa Mesa Food Court", "Corner Tree Cafe"],
+        ent: ["SM Cinema Santa Mesa", "Cyberzone Gaming Hubs"],
+        edu: ["UERM Memorial Medical Center", "Central Colleges of the Philippines (CCP)", "Immaculate Heart of Mary College"],
+        mall: ["SM City Santa Mesa", "Mezza Strip"],
+        church: ["Our Lady of Fatima Parish", "Sacred Heart Parish (Santa Mesa)"],
+        other: ["Jeep Terminal"]
+      },
+      "J. Ruiz": {
+        eat: ["San Juan Bakery", "Local BBQ Stalls"],
+        ent: ["Pinaglabanan Memorial Shrine", "San Juan Science Museum"],
+        edu: ["San Juan Elementary School", "Aquinas School"],
+        mall: ["Agora Market", "Greenhills Shopping Center"],
+        church: ["Santuario de Santo Cristo", "St. John the Baptist Parish"],
+        other: ["San Juan City Hall"]
+      },
+      "Gilmore": {
+        eat: ["Jollibee Gilmore Tech Hub"],
+        ent: ["PC Gaming Hubs", "Magnolia Cineplex"],
+        edu: ["St. Paul University Quezon City"],
+        mall: ["Robinsons Magnolia", "Gilmore IT Center"],
+        church: ["National Shrine of Our Lady of Mount Carmel"],
+        other: ["Computer Parts Shopping District"]
+      },
+      "Betty Go-Belmonte": {
+        eat: ["New Manila Residential Cafes", "Aurora Blvd Bakeries"],
+        ent: ["Araneta Center Activities"],
+        edu: ["Trinity University of Asia (nearby)", "St. Joseph's College"],
+        mall: ["Robinsons Magnolia"],
+        church: ["Nativity of the Lord Parish", "St. Joseph the Worker Parish"],
+        other: ["Residential New Manila Area"]
+      },
+      "Cubao": { 
+        eat: ["Bellini's", "Habanero"], 
+        ent: ["Art in Island 3D Museum", "Smart Araneta Coliseum", "Fiesta Carnival", "Bumi and Ashe"], 
+        edu: ["Technological Institute of the Philippines (TIP Cubao)"], 
+        mall: ["Gateway Mall 1 & 2", "Ali Mall", "Farmers Plaza"],
+        church: ["Our Lady of Perpetual Help Parish", "Christ the King Church"],
+        other: ["Araneta City Bus Terminal", "MRT-3 Cubao Transfer Connection"] 
+      },
+      "Anonas": {
+        eat: ["Jollibee", "City Walk Food Stalls"],
+        ent: ["Anonas KTV & Billiards Hubs", "Artisanal Coffee Shops"],
+        edu: ["World Citi Colleges (WCC)", "St. Bridget School", "Technological Institute of the Philippines"],
+        mall: ["Anonas City Center", "Anson's Square"],
+        church: ["St. Joseph Parish (Aurora Blvd)"],
+        other: ["Anonas Ukay-Ukay Market Hub", "Reese's boyfriend's condo! (Hi Pol !)"]
+      },
+      "Katipunan": { 
+        eat: ["Pop Up", "Gino's", "Kebomb", "Busan", "KozyKook", "Beanleaf", "Tyler's", "Jollibee", "BOK", "Kim's Ramyun", "Tonton Cafe"], 
+        ent: ["Arete", "UP Sunken Garden", "Varsity Hills Activity Hubs"], 
+        edu: ["Ateneo de Manila University", "University of the Philippines Diliman", "Miriam College"], 
+        mall: ["UP Town Center (UPTC)", "Regis Center"],
+        church: ["Santa Maria della Strada Parish", "Church of the Gesu"],
+        other: ["Tricycle Terminal", "Jeep Terminal"] 
+      },
+      "Santolan": {
+        eat: ["Riverbanks Food Court", "Marikina Riverbanks Food Stalls"],
+        ent: ["Riverbanks Center Activity Area", "Marikina River Park"],
+        edu: ["Baliuag University (Marikina Branch)", "Santolan Elementary School"],
+        mall: ["SM City Marikina", "Riverbanks Mall"],
+        church: ["St. Camillus de Lellis Parish"],
+        other: ["LRT-2 Depot Area", "Marikina River Trail"]
+      },
+      "Marikina": {
+        eat: ["Sta. Lucia Food Hall", "Robinsons Metro Food Hall"],
+        ent: ["Marikina Sports Center", "Sta. Lucia Bowling Center"],
+        edu: ["Infant Jesus Academy", "Marikina High School"],
+        mall: ["Sta. Lucia East Grand Mall", "Robinsons Metro East", "Feliz Town Center"],
+        church: ["St. Gemma Galgani Parish", "Our Lady of the Abandoned"],
+        other: ["Marikina-Pasig Boundary Landmark"]
+      },
+      "Antipolo": {
+        eat: ["Cloud 9 Dining Viewpoints", "KFC", "King Bee", "Funki Izakaya"],
+        ent: ["Hinulugang Taktak Falls", "Antipolo Overlook Spots"],
+        edu: ["Our Lady of Fatima University Antipolo"],
+        mall: ["SM City Masinag", "Decathlon Masinag Cornerview"],
+        church: ["Antipolo Cathedral (National Shrine of Our Lady of Peace and Good Voyage)"],
+        other: ["Terminal Hub to Rizal Province", "Reese's home station!!"]
       },
       "Default": { 
-        eat: ["Food"], 
-        ent: ["Entertainment"], 
-        edu: ["School"], 
-        mall: ["Nearby Mall"],
-        church: ["Nearby Church"],
-        other: ["7/11"] 
+        eat: ["Local Passenger Food Stall"], 
+        ent: ["Transit Commuter Lounge"], 
+        edu: ["Nearby Educational Institution"], 
+        mall: ["Local Commercial Center"],
+        church: ["Nearby Community Place of Worship"],
+        other: ["Convenience Store / 7-Eleven"] 
       }
     };
-
     // Make sure this URL is correct!
     const scriptBaseURL = "https://script.google.com/macros/s/AKfycbz3WijVbgnh2oOvZduBKIWZsU-BoHgHCQRtcGyLcSYJKSYmdACJCrCiBLXNl5FD7mu5/exec";
 
