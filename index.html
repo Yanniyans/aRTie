@@ -5,46 +5,47 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>aRTie | Global Live Tracker</title>
   <style>
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f9; color: #333; margin: 0; padding: 15px; }
-    h2, h3, h4 { margin: 0 0 10px 0; color: #1a1a1a; }
-    .card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 2px solid #e0e0e0;}
+    /* --- NEW COLOR PALETTE APPLIED --- */
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #ffffff; color: #071945; margin: 0; padding: 15px; }
+    h2, h3, h4 { margin: 0 0 10px 0; color: #071945; }
+    .card { background: #ffffff; border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(7, 25, 69, 0.1); border: 2px solid #071945;}
     .nav-card { cursor: pointer; position: relative; transition: border-color 0.2s;}
-    .nav-card:active { border-color: #ff9800; }
-    .highlight-text { font-size: 32px; font-weight: bold; text-align: center; margin: 10px 0; color: #ff9800; border-top: 2px solid #333; padding-top: 10px;}
-    .arrow { position: absolute; bottom: 15px; right: 20px; font-size: 24px; font-weight: bold; color: #ff9800; }
+    .nav-card:active { border-color: #ed6a12; }
+    .highlight-text { font-size: 32px; font-weight: bold; text-align: center; margin: 10px 0; color: #ed6a12; border-top: 2px solid #071945; padding-top: 10px;}
+    .arrow { position: absolute; bottom: 15px; right: 20px; font-size: 24px; font-weight: bold; color: #ed6a12; }
     
     .top-nav { display: flex; gap: 10px; margin-bottom: 15px; }
-    .nav-tab { flex: 1; padding: 10px; text-align: center; background: #ddd; border-radius: 8px; font-weight: bold; cursor: pointer; }
-    .nav-tab.active { background: #333; color: white; }
+    .nav-tab { flex: 1; padding: 10px; text-align: center; background: #ffffff; border: 1px solid #071945; border-radius: 8px; font-weight: bold; cursor: pointer; color: #071945; }
+    .nav-tab.active { background: #071945; color: #ffffff; border: 1px solid #071945; }
     
-    .btn { background: #333; color: white; border: none; padding: 10px 15px; border-radius: 8px; margin-bottom: 10px; cursor: pointer; font-size: 16px; width: 100%; font-weight: bold;}
-    .btn-action { background: #4caf50; }
+    .btn { background: #071945; color: #ffffff; border: none; padding: 10px 15px; border-radius: 8px; margin-bottom: 10px; cursor: pointer; font-size: 16px; width: 100%; font-weight: bold;}
+    .btn-action { background: #ed6a12; color: #ffffff; }
     .input-row { display: flex; gap: 10px; margin-bottom: 10px; }
-    input, select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; width: 100%; box-sizing: border-box;}
+    input, select { padding: 8px; border: 1px solid #071945; border-radius: 4px; font-size: 16px; width: 100%; box-sizing: border-box; background: #ffffff; color: #071945;}
     
-    .friend-row { background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 12px; border: 1px solid #e0e0e0;}
-    .unfriend-btn { background: #f44336; color: white; border: none; padding: 6px 10px; border-radius: 6px; font-weight: bold; cursor: pointer;}
-    .broadcast-box { background: #eeeeee; padding: 12px; border-radius: 8px; margin-top: 10px; border: 1px solid #ddd;}
+    .friend-row { background: #ffffff; padding: 15px; border-radius: 8px; margin-bottom: 12px; border: 1px solid #071945;}
+    .unfriend-btn { background: #ed6a12; color: white; border: none; padding: 6px 10px; border-radius: 6px; font-weight: bold; cursor: pointer;}
+    .broadcast-box { background: #ffffff; padding: 12px; border-radius: 8px; margin-top: 10px; border: 1px dashed #ed6a12;}
     
     .fare-grid { display: flex; justify-content: space-between; align-items: center; }
     .fare-col { width: 48%; }
-    .vertical-line { border-left: 2px solid #333; height: 60px; }
+    .vertical-line { border-left: 2px solid #071945; height: 60px; }
     
-    .view-selector-box { background: #e3f2fd; padding: 10px; border-radius: 8px; margin-bottom: 15px; border: 2px solid #2196f3; display: flex; align-items: center; gap: 10px;}
+    .view-selector-box { background: #ffffff; padding: 10px; border-radius: 8px; margin-bottom: 15px; border: 2px solid #ed6a12; display: flex; align-items: center; gap: 10px;}
     
-    #share-banner { display: none; background: #2196f3; color: white; padding: 12px; border-radius: 8px; margin-bottom: 15px; text-align: center; font-weight: bold; }
-    .arrived-banner { background: #4caf50 !important; animation: pulse 2s infinite; }
+    #share-banner { display: none; background: #ed6a12; color: white; padding: 12px; border-radius: 8px; margin-bottom: 15px; text-align: center; font-weight: bold; border: 2px solid #071945;}
+    .arrived-banner { background: #4caf50 !important; border-color: #4caf50 !important; animation: pulse 2s infinite; }
     @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
     
     table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
-    th { border-bottom: 2px solid #333; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #071945; }
+    th { border-bottom: 2px solid #071945; color: #071945;}
     .view { display: none; }
     .active-view { display: block; }
     
     /* Gimmick Categories */
-    .cat-title { font-size: 14px; font-weight: bold; color: #555; margin-top: 12px; margin-bottom: 6px; border-bottom: 1px solid #ddd; padding-bottom: 4px; text-transform: uppercase;}
-    .gimmick-item { padding: 8px; background: #fff3e0; border-radius: 6px; margin-bottom: 5px; font-weight: 500; font-size: 14px;}
+    .cat-title { font-size: 14px; font-weight: bold; color: #ed6a12; margin-top: 12px; margin-bottom: 6px; border-bottom: 1px solid #071945; padding-bottom: 4px; text-transform: uppercase;}
+    .gimmick-item { padding: 8px; background: #ffffff; border: 1px solid #071945; border-radius: 6px; margin-bottom: 5px; font-weight: 500; font-size: 14px; color: #071945;}
   </style>
 </head>
 <body>
@@ -65,8 +66,8 @@
 
     <div id="share-banner">Viewing Trip!</div>
 
-    <button id="stop-broadcast-btn" class="unfriend-btn" style="display:none; width:100%; margin-bottom:15px; font-size:16px; padding:12px;" onclick="stopMyBroadcast()">🛑 Stop Broadcasting My Trip</button>
-    <button id="stop-following-btn" class="unfriend-btn" style="display:none; width:100%; margin-bottom:15px; font-size:16px; padding:12px; background-color: #ff9800;" onclick="stopFollowingFriend()">🛑 Stop Following Friend's Trip</button>
+    <button id="stop-broadcast-btn" class="unfriend-btn" style="display:none; width:100%; margin-bottom:15px; font-size:16px; padding:12px; background-color: #ed6a12;" onclick="stopMyBroadcast()">🛑 Stop Broadcasting My Trip</button>
+    <button id="stop-following-btn" class="unfriend-btn" style="display:none; width:100%; margin-bottom:15px; font-size:16px; padding:12px; background-color: #ed6a12;" onclick="stopFollowingFriend()">🛑 Stop Following Friend's Trip</button>
 
     <div class="card nav-card" onclick="switchDetail('view-cars')">
       <h3>least occupied car:</h3>
@@ -99,15 +100,14 @@
         <div class="vertical-line"></div>
         <div class="fare-col" style="text-align: center;">
           <h3>Price:</h3>
-          <h2 id="fare-price" style="color: #4caf50; margin:0;">--</h2>
+          <h2 id="fare-price" style="color: #ed6a12; margin:0;">--</h2>
         </div>
       </div>
     </div>
 
-    <div class="card nav-card" onclick="switchDetail('view-history')">
+    <div class="card">
       <h4 id="main-prev-label">Left &lt;Prev. Station&gt;:</h4>
-      <div class="highlight-text" style="font-size: 28px; color: #333;" id="prev-station-time">--:-- --</div>
-      <div class="arrow">&rarr;</div>
+      <div class="highlight-text" style="font-size: 28px; color: #071945;" id="prev-station-time">--:-- --</div>
     </div>
 
     <div class="card">
@@ -121,8 +121,8 @@
   <div id="view-friends" class="view">
     <div class="card" style="text-align: center;">
       <h3>Your aRTie ID</h3>
-      <h1 id="my-id-display" style="color: #ff9800; font-size: 48px; margin: 10px 0;">----</h1>
-      <p style="margin: 0; color: #666; font-size: 14px;">Give this code to friends so they can add you.</p>
+      <h1 id="my-id-display" style="color: #ed6a12; font-size: 48px; margin: 10px 0;">----</h1>
+      <p style="margin: 0; color: #071945; font-size: 14px;">Give this code to friends so they can add you.</p>
     </div>
     <div class="card">
       <h3>Add a Friend</h3>
@@ -141,10 +141,6 @@
   <div id="view-cars" class="view">
     <button class="btn" onclick="switchDetail('view-home')">&larr; Back</button>
     <div class="card"><table id="cars-table"><tr><th>Other cars</th><th>capacity</th></tr></table></div>
-  </div>
-  <div id="view-history" class="view">
-    <button class="btn" onclick="switchDetail('view-home')">&larr; Back</button>
-    <div class="card"><table id="history-table"><tr><th>station name</th><th>time</th></tr></table></div>
   </div>
 
   <script>
@@ -187,22 +183,22 @@
 
     function renderFriends() {
       let html = "";
-      if (friends.length === 0) { html = "<p style='color:#888; font-style:italic;'>No friends added yet.</p>"; } else {
+      if (friends.length === 0) { html = "<p style='color:#071945; font-style:italic;'>No friends added yet.</p>"; } else {
         friends.forEach(f => {
           html += `
             <div class="friend-row">
               <div style="display:flex; justify-content:space-between; align-items:center;">
-                <div><strong style="font-size: 20px;">${f.name}</strong> <span style="color:#666; font-size: 14px;">(ID: ${f.id})</span></div>
-                <button class="unfriend-btn" onclick="removeFriend('${f.id}')" title="Remove Friend"></button>
+                <div><strong style="font-size: 20px;">${f.name}</strong> <span style="color:#071945; font-size: 14px;">(ID: ${f.id})</span></div>
+                <button class="unfriend-btn" onclick="removeFriend('${f.id}')" title="Remove Friend">❌</button>
               </div>
               
               <div class="broadcast-box">
-                <div style="font-size: 13px; color: #444; margin-bottom: 8px; font-weight: bold; text-transform: uppercase;">
+                <div style="font-size: 13px; color: #071945; margin-bottom: 8px; font-weight: bold; text-transform: uppercase;">
                   ▶ When I broadcast, I'll be in:
                 </div>
                 <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 12px;">
                   <select id="car-select-${f.id}" style="flex: 1; margin:0;"><option value="1">Car 1</option><option value="2">Car 2</option><option value="3">Car 3</option></select>
-                  <span style="font-size: 13px; color: #666; font-weight: bold;"> going to </span>
+                  <span style="font-size: 13px; color: #071945; font-weight: bold;"> going to </span>
                   <select id="dest-select-${f.id}" style="flex: 1.5; margin:0;">${stationOptions}</select>
                 </div>
                 <button class="btn btn-action" style="margin:0;" onclick="startBroadcast('${f.id}')">📡 Broadcast Trip to ${f.name}</button>
