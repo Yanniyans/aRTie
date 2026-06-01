@@ -63,7 +63,7 @@
       </select>
     </div>
 
-    <div id="share-banner">👀 Viewing Trip!</div>
+    <div id="share-banner">Viewing Trip!</div>
 
     <button id="stop-broadcast-btn" class="unfriend-btn" style="display:none; width:100%; margin-bottom:15px; font-size:16px; padding:12px;" onclick="stopMyBroadcast()">🛑 Stop Broadcasting My Trip</button>
     <button id="stop-following-btn" class="unfriend-btn" style="display:none; width:100%; margin-bottom:15px; font-size:16px; padding:12px; background-color: #ff9800;" onclick="stopFollowingFriend()">🛑 Stop Following Friend's Trip</button>
@@ -193,7 +193,7 @@
             <div class="friend-row">
               <div style="display:flex; justify-content:space-between; align-items:center;">
                 <div><strong style="font-size: 20px;">${f.name}</strong> <span style="color:#666; font-size: 14px;">(ID: ${f.id})</span></div>
-                <button class="unfriend-btn" onclick="removeFriend('${f.id}')" title="Remove Friend">❌</button>
+                <button class="unfriend-btn" onclick="removeFriend('${f.id}')" title="Remove Friend"></button>
               </div>
               
               <div class="broadcast-box">
@@ -232,10 +232,38 @@
 
     // --- CATEGORIZED GIMMICKS DICTIONARY ---
     const gimmicks = {
-      "Katipunan": { eat: ["Pop Up", "Gino's Brick Oven Pizza"], ent: ["Ateneo Art Gallery", "UP Sunken Garden"], edu: ["Ateneo", "UP Diliman", "Miriam"], other: ["UP Town Center"] },
-      "Cubao": { eat: ["Bellini's", "Cubao Expo"], ent: ["Art in Island", "Smart Araneta Coliseum"], edu: ["TIP Cubao"], other: ["Ali Mall", "Gateway Mall"] },
-      "Legarda": { eat: ["Cafe UK"], ent: ["National Museum"], edu: ["San Beda", "CEU", "Arellano"], other: ["Recto Bookstores"] },
-      "Default": { eat: ["Food"], ent: ["Entertainment"], edu: ["School"], other: ["7/11"] }
+      "Katipunan": { 
+        eat: ["Pop Up", "Gino's Brick Oven Pizza"], 
+        ent: ["Ateneo Art Gallery", "UP Sunken Garden"], 
+        edu: ["Ateneo", "UP Diliman", "Miriam"], 
+        mall: ["UP Town Center", "SM Marikina (via trike)"],
+        church: ["Santa Maria della Strada Parish", "Church of the Gesu"],
+        other: ["Tricycle Terminal"] 
+      },
+      "Cubao": { 
+        eat: ["Bellini's", "Cubao Expo"], 
+        ent: ["Art in Island", "Smart Araneta Coliseum"], 
+        edu: ["TIP Cubao"], 
+        mall: ["Gateway Mall", "Ali Mall", "Farmers Plaza"],
+        church: ["Our Lady of Perpetual Help", "Christ the King"],
+        other: ["Bus Terminal"] 
+      },
+      "Legarda": { 
+        eat: ["Cafe UK"], 
+        ent: ["National Museum"], 
+        edu: ["San Beda", "CEU", "Arellano"], 
+        mall: ["SM Manila (nearby)", "Isetann Recto"],
+        church: ["San Sebastian Church", "Quiapo Church"],
+        other: ["Recto Bookstores"] 
+      },
+      "Default": { 
+        eat: ["Food"], 
+        ent: ["Entertainment"], 
+        edu: ["School"], 
+        mall: ["Nearby Mall"],
+        church: ["Nearby Church"],
+        other: ["7/11"] 
+      }
     };
 
     // Make sure this URL is correct!
@@ -341,13 +369,16 @@
       document.getElementById('prev-station-time').innerText = data.currentTime;
       
       document.getElementById('gimmick-title').innerText = "Spots near " + stationName + ":";
-      let spots = gimmicks[stationName] || gimmicks["Default"]; let spotsHtml = "";
+      let spots = gimmicks[stationName] || gimmicks["Default"]; 
+      let spotsHtml = ""; 
+              
+      if (spots.eat && spots.eat.length > 0) spotsHtml += '<div class="cat-title">Places to Eat</div>' + spots.eat.map(s => `<div class='gimmick-item'>${s}</div>`).join(''); 
+      if (spots.ent && spots.ent.length > 0) spotsHtml += '<div class="cat-title">Places to Go</div>' + spots.ent.map(s => `<div class='gimmick-item'>${s}</div>`).join(''); 
+      if (spots.edu && spots.edu.length > 0) spotsHtml += '<div class="cat-title">Schools</div>' + spots.edu.map(s => `<div class='gimmick-item'>${s}</div>`).join(''); 
+      if (spots.mall && spots.mall.length > 0) spotsHtml += '<div class="cat-title">Malls</div>' + spots.mall.map(s => `<div class='gimmick-item'>${s}</div>`).join(''); 
+      if (spots.church && spots.church.length > 0) spotsHtml += '<div class="cat-title">Churches</div>' + spots.church.map(s => `<div class='gimmick-item'>${s}</div>`).join(''); 
+      if (spots.other && spots.other.length > 0) spotsHtml += '<div class="cat-title">Others</div>' + spots.other.map(s => `<div class='gimmick-item'>${s}</div>`).join(''); 
       
-      if (spots.eat && spots.eat.length > 0) spotsHtml += `<div class="cat-title">🍽️ Places to Eat</div>` + spots.eat.map(s => `<div class='gimmick-item'>${s}</div>`).join('');
-      if (spots.ent && spots.ent.length > 0) spotsHtml += `<div class="cat-title">🎭 Entertainment</div>` + spots.ent.map(s => `<div class='gimmick-item'>${s}</div>`).join('');
-      if (spots.edu && spots.edu.length > 0) spotsHtml += `<div class="cat-title">🎓 Schools</div>` + spots.edu.map(s => `<div class='gimmick-item'>${s}</div>`).join('');
-      if (spots.mall && spots.mall.length > 0) spotsHtml += `<div class="cat-title">🛍️ Malls</div>` + spots.mall.map(s => `<div class='gimmick-item'>${s}</div>`).join(''); 
-      if (spots.other && spots.other.length > 0) spotsHtml += `<div class="cat-title">📌 Others</div>` + spots.other.map(s => `<div class='gimmick-item'>${s}</div>`).join('');
       document.getElementById('gimmick-list').innerHTML = spotsHtml;
 
       let carsHtml = "<tr><th>Other cars</th><th>capacity</th></tr>";
